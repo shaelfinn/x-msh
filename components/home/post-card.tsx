@@ -27,7 +27,7 @@ interface PostCardProps {
   createdAt: string;
   content: string;
   imageUrl?: string | null;
-  avatarUrl: string;
+  avatarUrl?: string | null;
   commentsCount?: number;
   likesCount?: number;
   impressionsCount?: number;
@@ -52,8 +52,8 @@ export function PostCard({
     >
       <div className="flex gap-3">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={avatarUrl} alt={author} />
-          <AvatarFallback>{author[0]}</AvatarFallback>
+          <AvatarImage src={avatarUrl || undefined} alt={author} />
+          <AvatarFallback>{author[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center justify-between">

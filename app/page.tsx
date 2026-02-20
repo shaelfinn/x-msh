@@ -5,8 +5,16 @@ import { Composer } from "@/components/home/composer";
 import { MobileHeader } from "@/components/shared/mobile-header";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { mockPosts } from "@/lib/mock-data";
+import { getCurrentUser } from "@/lib/auth-server";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/signin");
+  }
+
   return (
     <>
       <div className="flex min-h-screen pb-16 lg:pb-0">
@@ -26,7 +34,7 @@ export default function Home() {
             </div>
           </div>
 
-          <Composer />
+          <Composer user={{ name: user.name, image: user.image }} />
 
           <div>
             {mockPosts.map((post) => (

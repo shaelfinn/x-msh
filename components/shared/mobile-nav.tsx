@@ -29,7 +29,10 @@ export function MobileNav() {
                   isActive ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
-                <Icon className="h-6 w-6" />
+                <Icon
+                  className="h-6 w-6"
+                  fill={isActive ? "currentColor" : "none"}
+                />
               </Link>
             );
           })}
