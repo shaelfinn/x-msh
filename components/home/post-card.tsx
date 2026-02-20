@@ -8,6 +8,7 @@ import {
   BarChart2,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -19,34 +20,39 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-interface TweetProps {
+interface PostCardProps {
+  id: number;
   author: string;
   username: string;
-  time: string;
+  createdAt: string;
   content: string;
-  image?: string;
-  avatar: string;
-  replies?: number;
-  likes?: number;
-  impressions?: number;
+  imageUrl?: string;
+  avatarUrl: string;
+  commentsCount?: number;
+  likesCount?: number;
+  impressionsCount?: number;
 }
 
-export function Tweet({
+export function PostCard({
+  id,
   author,
   username,
-  time,
+  createdAt,
   content,
-  image,
-  avatar,
-  replies = 0,
-  likes = 0,
-  impressions = 0,
-}: TweetProps) {
+  imageUrl,
+  avatarUrl,
+  commentsCount = 0,
+  likesCount = 0,
+  impressionsCount = 0,
+}: PostCardProps) {
   return (
-    <div className="border-b border-border p-4">
+    <Link
+      href={`/post/${id}`}
+      className="block border-b border-border p-4 transition-colors hover:bg-muted/30"
+    >
       <div className="flex gap-3">
         <Avatar className="h-12 w-12">
-          <AvatarImage src={avatar} alt={author} />
+          <AvatarImage src={avatarUrl} alt={author} />
           <AvatarFallback>{author[0]}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
@@ -59,18 +65,20 @@ export function Tweet({
                 @{username}
               </span>
               <span className="shrink-0 text-muted-foreground">·</span>
-              <span className="shrink-0 text-muted-foreground">{time}</span>
+              <span className="shrink-0 text-muted-foreground">
+                {createdAt}
+              </span>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
               <MoreHorizontal className="h-5 w-5" />
             </Button>
           </div>
           <p className="mt-1 whitespace-pre-wrap">{content}</p>
-          {image && (
+          {imageUrl && (
             <div className="mt-3 overflow-hidden rounded-2xl border border-border">
               <Image
-                src={image}
-                alt="Tweet image"
+                src={imageUrl}
+                alt="Post image"
                 width={600}
                 height={400}
                 className="w-full object-cover"
@@ -84,7 +92,7 @@ export function Tweet({
               className="gap-2 text-muted-foreground hover:text-primary"
             >
               <MessageCircle className="h-5 w-5" />
-              <span className="text-sm">{formatNumber(replies)}</span>
+              <span className="text-sm">{formatNumber(commentsCount)}</span>
             </Button>
             <Button
               variant="ghost"
@@ -92,7 +100,7 @@ export function Tweet({
               className="gap-2 text-muted-foreground hover:text-pink-600"
             >
               <Heart className="h-5 w-5" />
-              <span className="text-sm">{formatNumber(likes)}</span>
+              <span className="text-sm">{formatNumber(likesCount)}</span>
             </Button>
             <Button
               variant="ghost"
@@ -100,7 +108,7 @@ export function Tweet({
               className="gap-2 text-muted-foreground hover:text-primary"
             >
               <BarChart2 className="h-5 w-5" />
-              <span className="text-sm">{formatNumber(impressions)}</span>
+              <span className="text-sm">{formatNumber(impressionsCount)}</span>
             </Button>
             <Button
               variant="ghost"
@@ -112,6 +120,6 @@ export function Tweet({
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }

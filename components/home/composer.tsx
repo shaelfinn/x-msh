@@ -1,8 +1,8 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Image, Smile, Calendar, MapPin, Settings2 } from "lucide-react";
+import { Smile, Calendar, MapPin, Settings2, ImageIcon } from "lucide-react";
 
-export function TweetComposer() {
+export function Composer() {
   return (
     <div className="border-b border-border p-4">
       <div className="flex gap-3">
@@ -23,7 +23,7 @@ export function TweetComposer() {
                 size="icon"
                 className="h-9 w-9 text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
               >
-                <Image className="h-5 w-5" />
+                <ImageIcon className="h-5 w-5" />
               </Button>
               <Button
                 variant="ghost"

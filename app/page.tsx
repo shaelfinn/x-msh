@@ -1,10 +1,10 @@
-import { Sidebar } from "@/components/sidebar";
-import { Tweet } from "@/components/tweet";
-import { Trending } from "@/components/trending";
-import { TweetComposer } from "@/components/tweet-composer";
-import { MobileHeader } from "@/components/mobile-header";
-import { MobileNav } from "@/components/mobile-nav";
-import { mockTweets } from "@/lib/mock-data";
+import { Sidebar } from "@/components/shared/sidebar";
+import { PostCard } from "@/components/home/post-card";
+import { Trending } from "@/components/home/trending";
+import { Composer } from "@/components/home/composer";
+import { MobileHeader } from "@/components/shared/mobile-header";
+import { MobileNav } from "@/components/shared/mobile-nav";
+import { mockPosts } from "@/lib/mock-data";
 
 export default function Home() {
   return (
@@ -26,11 +26,11 @@ export default function Home() {
             </div>
           </div>
 
-          <TweetComposer />
+          <Composer />
 
           <div>
-            {mockTweets.map((tweet) => (
-              <Tweet key={tweet.id} {...tweet} />
+            {mockPosts.map((post) => (
+              <PostCard key={post.id} {...post} />
             ))}
           </div>
         </main>

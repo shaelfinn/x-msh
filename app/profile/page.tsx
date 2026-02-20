@@ -1,51 +1,48 @@
-import { Sidebar } from "@/components/sidebar";
-import { Trending } from "@/components/trending";
-import { ProfileHeader } from "@/components/profile-header";
-import { ProfileTabs } from "@/components/profile-tabs";
-import { Tweet } from "@/components/tweet";
-import { MobileNav } from "@/components/mobile-nav";
+import { Sidebar } from "@/components/shared/sidebar";
+import { Trending } from "@/components/home/trending";
+import { ProfileHeader } from "@/components/profile/profile-header";
+import { ProfileTabs } from "@/components/profile/profile-tabs";
+import { PostCard } from "@/components/home/post-card";
+import { MobileNav } from "@/components/shared/mobile-nav";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-const userTweets = [
+const userPosts = [
   {
     id: 1,
     author: "Mshan Cee",
     username: "mshancee",
-    time: "3h",
+    createdAt: "3h",
     content:
       "Building something amazing with Next.js 15! The new features are incredible 🚀",
-    avatar: "/avatar.jpg",
-    image: "/1.jpg",
-    replies: 12,
-    retweets: 45,
-    likes: 234,
-    impressions: 5600,
+    avatarUrl: "/avatar.jpg",
+    imageUrl: "/1.jpg",
+    commentsCount: 12,
+    likesCount: 234,
+    impressionsCount: 5600,
   },
   {
     id: 2,
     author: "Mshan Cee",
     username: "mshancee",
-    time: "1d",
+    createdAt: "1d",
     content: "Just shipped a new feature. Feeling productive today! 💪",
-    avatar: "/avatar.jpg",
-    replies: 8,
-    retweets: 23,
-    likes: 156,
-    impressions: 3200,
+    avatarUrl: "/avatar.jpg",
+    commentsCount: 8,
+    likesCount: 156,
+    impressionsCount: 3200,
   },
   {
     id: 3,
     author: "Mshan Cee",
     username: "mshancee",
-    time: "2d",
+    createdAt: "2d",
     content: "Coffee + Code = Perfect morning ☕️",
-    avatar: "/avatar.jpg",
-    image: "/2.jpg",
-    replies: 15,
-    retweets: 34,
-    likes: 289,
-    impressions: 4500,
+    avatarUrl: "/avatar.jpg",
+    imageUrl: "/2.jpg",
+    commentsCount: 15,
+    likesCount: 289,
+    impressionsCount: 4500,
   },
 ];
 
@@ -72,8 +69,8 @@ export default function ProfilePage() {
           <ProfileTabs />
 
           <div>
-            {userTweets.map((tweet) => (
-              <Tweet key={tweet.id} {...tweet} />
+            {userPosts.map((post) => (
+              <PostCard key={post.id} {...post} />
             ))}
           </div>
         </main>
