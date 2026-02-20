@@ -4,7 +4,7 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { PostCard } from "@/components/home/post-card";
 import { MobileNav } from "@/components/shared/mobile-nav";
-import { mockUsers } from "@/lib/mock-users";
+import { getUserData } from "@/lib/mock-users";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -16,8 +16,8 @@ export default async function ProfilePage({
 }) {
   const { username } = await params;
 
-  // Get user data from mock data
-  const userData = mockUsers[username as keyof typeof mockUsers];
+  // Get user data with posts
+  const userData = getUserData(username);
 
   // If user doesn't exist, show 404
   if (!userData) {

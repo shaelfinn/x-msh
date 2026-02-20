@@ -1,7 +1,7 @@
 import { Sidebar } from "@/components/shared/sidebar";
 import { Trending } from "@/components/home/trending";
 import { MobileNav } from "@/components/shared/mobile-nav";
-import { CommentsSection } from "@/components/home/comments-section";
+import { CommentsList } from "@/components/comments/list";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,12 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  mockPostsData,
+  getCommentsByPostId,
+  getUserById,
+} from "@/lib/mock-data";
+import { notFound } from "next/navigation";
 
 function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -30,58 +36,29 @@ export default async function PostPage({
 }: {
   params: Promise<{ username: string; id: string }>;
 }) {
-  const { username, id } = await params;
+  const { id } = await params;
 
-  // Mock data - in production, fetch post based on username and id
+  // Get post data
+  const postData = mockPostsData.find((p) => p.id === parseInt(id));
+  if (!postData) {
+    notFound();
+  }
+
+  const user = getUserById(postData.userId);
+  if (!user) {
+    notFound();
+  }
+
+  const comments = getCommentsByPostId(parseInt(id));
+
   const post = {
-    id: parseInt(id),
-    author: "Sarah Chen",
-    username: username,
-    createdAt: "Feb 20, 2026 · 22:45",
-    content:
-      "Just shipped a new feature using Next.js 15 and the performance improvements are incredible! 🚀\n\nThe new caching strategies make everything so much faster.",
-    avatarUrl: "/avatar.jpg",
-    imageUrl: "/1.jpg",
-    commentsCount: 24,
-    likesCount: 892,
-    bookmarksCount: 156,
-    impressionsCount: 12500,
+    ...postData,
+    author: user.displayName,
+    username: user.username,
+    avatarUrl: user.avatarUrl,
+    commentsCount: comments.length,
+    bookmarksCount: 156, // Mock data for now
   };
-
-  const comments = [
-    {
-      id: 1,
-      author: "Alex Rivera",
-      username: "alexcodes",
-      avatarUrl: "/avatar.jpg",
-      content:
-        "This is amazing! Can you share more details about the caching strategies you used?",
-      createdAt: "1h",
-      likesCount: 12,
-      impressionsCount: 450,
-    },
-    {
-      id: 2,
-      author: "Maya Patel",
-      username: "mayabuilds",
-      avatarUrl: "/avatar.jpg",
-      content: "Congrats on the launch! 🎉 Next.js 15 is a game changer.",
-      createdAt: "45m",
-      likesCount: 8,
-      impressionsCount: 320,
-    },
-    {
-      id: 3,
-      author: "Jordan Lee",
-      username: "jordantech",
-      avatarUrl: "/avatar.jpg",
-      content:
-        "I've been testing Next.js 15 too and the performance gains are real. Great work!",
-      createdAt: "30m",
-      likesCount: 5,
-      impressionsCount: 280,
-    },
-  ];
 
   return (
     <>
@@ -179,7 +156,7 @@ export default async function PostPage({
             </div>
           </div>
 
-          <CommentsSection postId={post.id} comments={comments} />
+          <CommentsList postId={post.id} comments={comments} />
         </main>
 
         <Trending />

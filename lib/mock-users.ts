@@ -1,107 +1,20 @@
-export const mockUsers = {
-  mshancee: {
-    username: "mshancee",
-    displayName: "Mshan Cee",
-    bio: "Full-stack developer | Building cool stuff with React & Next.js 🚀 | Coffee enthusiast ☕",
-    avatarUrl: "/avatar.jpg",
-    coverUrl: "/cover.jpg",
-    location: "San Francisco, CA",
-    joinedDate: "March 2020",
-    followingCount: 247,
-    followersCount: 1892,
-    postsCount: 247,
-    posts: [
-      {
-        id: 1,
-        author: "Mshan Cee",
-        username: "mshancee",
-        createdAt: "3h",
-        content:
-          "Building something amazing with Next.js 15! The new features are incredible 🚀",
-        avatarUrl: "/avatar.jpg",
-        imageUrl: "/1.jpg",
-        commentsCount: 12,
-        likesCount: 234,
-        impressionsCount: 5600,
-      },
-      {
-        id: 2,
-        author: "Mshan Cee",
-        username: "mshancee",
-        createdAt: "1d",
-        content: "Just shipped a new feature. Feeling productive today! 💪",
-        avatarUrl: "/avatar.jpg",
-        commentsCount: 8,
-        likesCount: 156,
-        impressionsCount: 3200,
-      },
-      {
-        id: 3,
-        author: "Mshan Cee",
-        username: "mshancee",
-        createdAt: "2d",
-        content: "Coffee + Code = Perfect morning ☕️",
-        avatarUrl: "/avatar.jpg",
-        imageUrl: "/2.jpg",
-        commentsCount: 15,
-        likesCount: 289,
-        impressionsCount: 4500,
-      },
-    ],
-  },
-  sarahdev: {
-    username: "sarahdev",
-    displayName: "Sarah Chen",
-    bio: "Senior Frontend Engineer | React & TypeScript enthusiast | Open source contributor",
-    avatarUrl: "/avatar.jpg",
-    coverUrl: "/cover.jpg",
-    location: "New York, NY",
-    joinedDate: "January 2019",
-    followingCount: 342,
-    followersCount: 5234,
-    postsCount: 892,
-    posts: [
-      {
-        id: 101,
-        author: "Sarah Chen",
-        username: "sarahdev",
-        createdAt: "2h",
-        content:
-          "Just shipped a new feature using Next.js 15 and the performance improvements are incredible! 🚀\n\nThe new caching strategies make everything so much faster.",
-        avatarUrl: "/avatar.jpg",
-        imageUrl: "/1.jpg",
-        commentsCount: 24,
-        likesCount: 892,
-        impressionsCount: 12500,
-      },
-    ],
-  },
-  alexcodes: {
-    username: "alexcodes",
-    displayName: "Alex Rivera",
-    bio: "Full-stack developer | TypeScript advocate | Building in public",
-    avatarUrl: "/avatar.jpg",
-    coverUrl: "/cover.jpg",
-    location: "Austin, TX",
-    joinedDate: "June 2020",
-    followingCount: 189,
-    followersCount: 3421,
-    postsCount: 567,
-    posts: [
-      {
-        id: 201,
-        author: "Alex Rivera",
-        username: "alexcodes",
-        createdAt: "4h",
-        content:
-          "Hot take: TypeScript has made me a better JavaScript developer.\n\nThe type safety catches so many bugs before they reach production.",
-        avatarUrl: "/avatar.jpg",
-        commentsCount: 89,
-        likesCount: 1247,
-        impressionsCount: 23400,
-      },
-    ],
-  },
+import { mockUsers as users, getPostsByUsername } from "./mock-data";
+
+export const mockUsers = users;
+
+export type MockUser = (typeof mockUsers)[keyof typeof mockUsers] & {
+  posts: ReturnType<typeof getPostsByUsername>;
+  postsCount: number;
 };
 
-export type MockUser = (typeof mockUsers)[keyof typeof mockUsers];
+export function getUserData(username: string): MockUser | null {
+  const user = mockUsers[username as keyof typeof mockUsers];
+  if (!user) return null;
+
+  const posts = getPostsByUsername(username);
+  return {
+    ...user,
+    posts,
+    postsCount: posts.length,
+  };
+}

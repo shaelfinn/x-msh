@@ -26,7 +26,7 @@ interface PostCardProps {
   username: string;
   createdAt: string;
   content: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   avatarUrl: string;
   commentsCount?: number;
   likesCount?: number;
