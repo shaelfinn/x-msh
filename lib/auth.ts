@@ -17,5 +17,34 @@ export const auth = betterAuth({
     expiresIn: 60 * 60 * 24 * 7, // 7 days
     updateAge: 60 * 60 * 24, // 1 day (every 1 day the session expiry is updated)
   },
+  user: {
+    additionalFields: {
+      username: {
+        type: "string",
+        required: false,
+      },
+      country: {
+        type: "string",
+        required: false,
+        defaultValue: "KE",
+      },
+      bio: {
+        type: "string",
+        required: false,
+      },
+      location: {
+        type: "string",
+        required: false,
+      },
+      website: {
+        type: "string",
+        required: false,
+      },
+      cover: {
+        type: "string",
+        required: false,
+      },
+    },
+  },
   plugins: [nextCookies()], // make sure this is the last plugin in the array
 });
