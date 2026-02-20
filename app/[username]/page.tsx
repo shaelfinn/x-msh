@@ -4,49 +4,29 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { PostCard } from "@/components/home/post-card";
 import { MobileNav } from "@/components/shared/mobile-nav";
+import { mockUsers } from "@/lib/mock-users";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
-const userPosts = [
-  {
-    id: 1,
-    author: "Mshan Cee",
-    username: "mshancee",
-    createdAt: "3h",
-    content:
-      "Building something amazing with Next.js 15! The new features are incredible 🚀",
-    avatarUrl: "/avatar.jpg",
-    imageUrl: "/1.jpg",
-    commentsCount: 12,
-    likesCount: 234,
-    impressionsCount: 5600,
-  },
-  {
-    id: 2,
-    author: "Mshan Cee",
-    username: "mshancee",
-    createdAt: "1d",
-    content: "Just shipped a new feature. Feeling productive today! 💪",
-    avatarUrl: "/avatar.jpg",
-    commentsCount: 8,
-    likesCount: 156,
-    impressionsCount: 3200,
-  },
-  {
-    id: 3,
-    author: "Mshan Cee",
-    username: "mshancee",
-    createdAt: "2d",
-    content: "Coffee + Code = Perfect morning ☕️",
-    avatarUrl: "/avatar.jpg",
-    imageUrl: "/2.jpg",
-    commentsCount: 15,
-    likesCount: 289,
-    impressionsCount: 4500,
-  },
-];
+export default async function ProfilePage({
+  params,
+}: {
+  params: Promise<{ username: string }>;
+}) {
+  const { username } = await params;
 
-export default function ProfilePage() {
+  // Get user data from mock data
+  const userData = mockUsers[username as keyof typeof mockUsers];
+
+  // If user doesn't exist, show 404
+  if (!userData) {
+    notFound();
+  }
+
+  // Check if viewing own profile (in production, check against authenticated user)
+  const isOwnProfile = username === "mshancee";
+
   return (
     <>
       <div className="flex min-h-screen pb-16 lg:pb-0">
@@ -59,17 +39,19 @@ export default function ProfilePage() {
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <div>
-                <h1 className="text-xl font-bold">Mshan Cee</h1>
-                <p className="text-xs text-muted-foreground">247 posts</p>
+                <h1 className="text-xl font-bold">{userData.displayName}</h1>
+                <p className="text-xs text-muted-foreground">
+                  {userData.postsCount} posts
+                </p>
               </div>
             </div>
           </div>
 
-          <ProfileHeader />
+          <ProfileHeader userData={userData} isOwnProfile={isOwnProfile} />
           <ProfileTabs />
 
           <div>
-            {userPosts.map((post) => (
+            {userData.posts.map((post) => (
               <PostCard key={post.id} {...post} />
             ))}
           </div>

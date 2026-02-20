@@ -47,7 +47,7 @@ export function PostCard({
 }: PostCardProps) {
   return (
     <Link
-      href={`/post/${id}`}
+      href={`/${username}/post/${id}`}
       className="block border-b border-border p-4 transition-colors hover:bg-muted/30"
     >
       <div className="flex gap-3">

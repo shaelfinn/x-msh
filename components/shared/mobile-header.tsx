@@ -4,7 +4,7 @@ import Link from "next/link";
 export function MobileHeader() {
   return (
     <div className="flex h-14 items-center justify-between px-4 lg:justify-center">
-      <Link href="/profile" className="lg:hidden">
+      <Link href="/mshancee" className="lg:hidden">
         <Avatar className="h-8 w-8">
           <AvatarImage src="/avatar.jpg" alt="Mshan Cee" />
           <AvatarFallback>MC</AvatarFallback>

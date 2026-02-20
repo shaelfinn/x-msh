@@ -15,57 +15,6 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 
-// Mock data - in production, fetch based on params.id
-const post = {
-  id: 1,
-  author: "Sarah Chen",
-  username: "sarahdev",
-  createdAt: "Feb 20, 2026 · 22:45",
-  content:
-    "Just shipped a new feature using Next.js 15 and the performance improvements are incredible! 🚀\n\nThe new caching strategies make everything so much faster.",
-  avatarUrl: "/avatar.jpg",
-  imageUrl: "/1.jpg",
-  commentsCount: 24,
-  likesCount: 892,
-  bookmarksCount: 156,
-  impressionsCount: 12500,
-};
-
-const comments = [
-  {
-    id: 1,
-    author: "Alex Rivera",
-    username: "alexcodes",
-    avatarUrl: "/avatar.jpg",
-    content:
-      "This is amazing! Can you share more details about the caching strategies you used?",
-    createdAt: "1h",
-    likesCount: 12,
-    impressionsCount: 450,
-  },
-  {
-    id: 2,
-    author: "Maya Patel",
-    username: "mayabuilds",
-    avatarUrl: "/avatar.jpg",
-    content: "Congrats on the launch! 🎉 Next.js 15 is a game changer.",
-    createdAt: "45m",
-    likesCount: 8,
-    impressionsCount: 320,
-  },
-  {
-    id: 3,
-    author: "Jordan Lee",
-    username: "jordantech",
-    avatarUrl: "/avatar.jpg",
-    content:
-      "I've been testing Next.js 15 too and the performance gains are real. Great work!",
-    createdAt: "30m",
-    likesCount: 5,
-    impressionsCount: 280,
-  },
-];
-
 function formatNumber(num: number): string {
   if (num >= 1000000) {
     return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
@@ -76,7 +25,64 @@ function formatNumber(num: number): string {
   return num.toString();
 }
 
-export default function PostPage() {
+export default async function PostPage({
+  params,
+}: {
+  params: Promise<{ username: string; id: string }>;
+}) {
+  const { username, id } = await params;
+
+  // Mock data - in production, fetch post based on username and id
+  const post = {
+    id: parseInt(id),
+    author: "Sarah Chen",
+    username: username,
+    createdAt: "Feb 20, 2026 · 22:45",
+    content:
+      "Just shipped a new feature using Next.js 15 and the performance improvements are incredible! 🚀\n\nThe new caching strategies make everything so much faster.",
+    avatarUrl: "/avatar.jpg",
+    imageUrl: "/1.jpg",
+    commentsCount: 24,
+    likesCount: 892,
+    bookmarksCount: 156,
+    impressionsCount: 12500,
+  };
+
+  const comments = [
+    {
+      id: 1,
+      author: "Alex Rivera",
+      username: "alexcodes",
+      avatarUrl: "/avatar.jpg",
+      content:
+        "This is amazing! Can you share more details about the caching strategies you used?",
+      createdAt: "1h",
+      likesCount: 12,
+      impressionsCount: 450,
+    },
+    {
+      id: 2,
+      author: "Maya Patel",
+      username: "mayabuilds",
+      avatarUrl: "/avatar.jpg",
+      content: "Congrats on the launch! 🎉 Next.js 15 is a game changer.",
+      createdAt: "45m",
+      likesCount: 8,
+      impressionsCount: 320,
+    },
+    {
+      id: 3,
+      author: "Jordan Lee",
+      username: "jordantech",
+      avatarUrl: "/avatar.jpg",
+      content:
+        "I've been testing Next.js 15 too and the performance gains are real. Great work!",
+      createdAt: "30m",
+      likesCount: 5,
+      impressionsCount: 280,
+    },
+  ];
+
   return (
     <>
       <div className="flex min-h-screen pb-16 lg:pb-0">
