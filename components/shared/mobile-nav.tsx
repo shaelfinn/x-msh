@@ -2,10 +2,11 @@
 
 import { Home, Search, Bell, Mail, Plus } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const navItems = [
     { href: "/", icon: Home, label: "Home" },
@@ -13,6 +14,20 @@ export function MobileNav() {
     { href: "/notifications", icon: Bell, label: "Notifications" },
     { href: "/messages", icon: Mail, label: "Messages" },
   ];
+
+  const handleComposeClick = () => {
+    if (pathname === "/") {
+      // Already on home, just scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      // Navigate to home first
+      router.push("/");
+      // Scroll to top after navigation
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100);
+    }
+  };
 
   return (
     <>
@@ -40,7 +55,10 @@ export function MobileNav() {
       </nav>
 
       {/* Floating Post Button */}
-      <button className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#1d9bf0] text-white shadow-lg transition-transform hover:scale-105 active:scale-95 lg:hidden">
+      <button
+        onClick={handleComposeClick}
+        className="fixed bottom-20 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[#1d9bf0] text-white shadow-lg transition-transform hover:scale-105 active:scale-95 lg:hidden"
+      >
         <Plus className="h-6 w-6" />
       </button>
     </>

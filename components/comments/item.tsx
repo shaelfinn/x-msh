@@ -15,7 +15,7 @@ function formatNumber(num: number): string {
 interface CommentItemProps {
   author: string;
   username: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   content: string;
   createdAt: string;
   likesCount: number;
@@ -35,7 +35,7 @@ export function CommentItem({
     <div className="border-b border-border p-4">
       <div className="flex gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={avatarUrl} alt={author} />
+          <AvatarImage src={avatarUrl || undefined} alt={author} />
           <AvatarFallback>{author[0]}</AvatarFallback>
         </Avatar>
         <div className="flex-1">

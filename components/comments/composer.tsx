@@ -2,7 +2,8 @@
 
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { createComment } from "@/app/actions/post";
 
 const MAX_CHARS = 280;
 
@@ -63,18 +64,38 @@ function CharacterCounter({ current, max }: { current: number; max: number }) {
   );
 }
 
-export function CommentComposer() {
+interface CommentComposerProps {
+  postId: string;
+  user?: {
+    name: string;
+    image: string | null;
+  };
+}
+
+export function CommentComposer({ postId, user }: CommentComposerProps) {
   const [commentText, setCommentText] = useState("");
   const [isFocused, setIsFocused] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const charCount = commentText.length;
   const isOverLimit = charCount > MAX_CHARS;
   const isActive = isFocused || commentText.length > 0;
 
+  const handleSubmit = () => {
+    if (!commentText.trim() || isOverLimit || isPending) return;
+
+    startTransition(async () => {
+      const result = await createComment(postId, commentText);
+      if (result.success) {
+        setCommentText("");
+      }
+    });
+  };
+
   return (
     <div className="flex gap-3 border-b border-border p-4">
       <Avatar className="h-10 w-10">
-        <AvatarImage src="/avatar.jpg" alt="You" />
-        <AvatarFallback>U</AvatarFallback>
+        <AvatarImage src={user?.image || undefined} alt={user?.name || "You"} />
+        <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
       </Avatar>
       <div className="flex-1">
         <div className="flex items-start gap-2">
@@ -84,8 +105,14 @@ export function CommentComposer() {
             onChange={(e) => setCommentText(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+                handleSubmit();
+              }
+            }}
             className="flex-1 resize-none bg-transparent text-lg outline-none placeholder:text-muted-foreground"
             rows={isActive ? 2 : 1}
+            disabled={isPending}
           />
           {!isActive && (
             <Button
@@ -105,10 +132,11 @@ export function CommentComposer() {
               )}
             </div>
             <Button
+              onClick={handleSubmit}
               className="rounded-full bg-[#1d9bf0] px-4 font-bold text-white hover:bg-[#1a8cd8] disabled:opacity-50"
-              disabled={!commentText.trim() || isOverLimit}
+              disabled={!commentText.trim() || isOverLimit || isPending}
             >
-              Reply
+              {isPending ? "Posting..." : "Reply"}
             </Button>
           </div>
         )}

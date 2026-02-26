@@ -4,9 +4,21 @@ import { Trending } from "@/components/home/trending";
 import { Composer } from "@/components/home/composer";
 import { MobileHeader } from "@/components/shared/mobile-header";
 import { MobileNav } from "@/components/shared/mobile-nav";
-import { mockPosts } from "@/lib/mock-data";
+import { getPosts } from "@/app/actions/post";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
+
+function formatTimeAgo(date: Date): string {
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (seconds < 60) return `${seconds}s`;
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
+  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h`;
+  if (seconds < 604800) return `${Math.floor(seconds / 86400)}d`;
+
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -14,6 +26,8 @@ export default async function Home() {
   if (!user) {
     redirect("/signin");
   }
+
+  const posts = await getPosts(user.id);
 
   return (
     <>
@@ -34,13 +48,33 @@ export default async function Home() {
             </div>
           </div>
 
-          <Composer user={{ name: user.name, image: user.image }} />
+          <Composer user={{ name: user.name, image: user.image ?? null }} />
 
-          <div>
-            {mockPosts.map((post) => (
-              <PostCard key={post.id} {...post} />
-            ))}
-          </div>
+          {posts.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              <p>No posts yet. Be the first to post!</p>
+            </div>
+          ) : (
+            <div>
+              {posts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  id={post.id}
+                  author={post.author.name}
+                  username={post.author.username || ""}
+                  createdAt={formatTimeAgo(new Date(post.createdAt))}
+                  content={post.content}
+                  images={post.media}
+                  avatarUrl={post.author.image}
+                  commentsCount={post.commentsCount}
+                  likesCount={post.likes}
+                  impressionsCount={post.impressions}
+                  isLiked={post.isLiked}
+                  isBookmarked={post.isBookmarked}
+                />
+              ))}
+            </div>
+          )}
         </main>
 
         <Trending />

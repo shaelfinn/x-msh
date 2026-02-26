@@ -85,8 +85,10 @@ export async function getUserProfile(username: string) {
   }
 }
 
-export async function getUserPosts(userId: string) {
+export async function getUserPosts(userId: string, currentUserId?: string) {
   try {
+    const { like, bookmark } = await import("@/db/schema");
+
     // Get posts by user (only top-level posts, not comments)
     const posts = await db
       .select({
@@ -96,6 +98,25 @@ export async function getUserPosts(userId: string) {
         likes: post.likes,
         impressions: post.impressions,
         createdAt: post.createdAt,
+        commentsCount: sql<number>`(
+          SELECT COUNT(*)::int 
+          FROM ${post} AS comments 
+          WHERE comments.parent_id = ${post.id}
+        )`,
+        isLiked: currentUserId
+          ? sql<boolean>`EXISTS(
+              SELECT 1 FROM ${like} 
+              WHERE ${like.userId} = ${currentUserId} 
+              AND ${like.postId} = ${post.id}
+            )`
+          : sql<boolean>`false`,
+        isBookmarked: currentUserId
+          ? sql<boolean>`EXISTS(
+              SELECT 1 FROM ${bookmark} 
+              WHERE ${bookmark.userId} = ${currentUserId} 
+              AND ${bookmark.postId} = ${post.id}
+            )`
+          : sql<boolean>`false`,
         author: {
           id: user.id,
           name: user.name,
@@ -108,24 +129,7 @@ export async function getUserPosts(userId: string) {
       .where(and(eq(post.authorId, userId), isNull(post.parentId)))
       .orderBy(desc(post.createdAt));
 
-    // Get comments count for each post
-    const postsWithCounts = await Promise.all(
-      posts.map(async (p) => {
-        const commentsResult = await db
-          .select({ count: sql<number>`count(*)` })
-          .from(post)
-          .where(eq(post.parentId, p.id));
-
-        const commentsCount = Number(commentsResult[0]?.count || 0);
-
-        return {
-          ...p,
-          commentsCount,
-        };
-      }),
-    );
-
-    return postsWithCounts;
+    return posts;
   } catch (error) {
     console.error("Error fetching user posts:", error);
     return [];
@@ -286,5 +290,199 @@ export async function toggleFollow(userId: string) {
   } catch (error) {
     console.error("Error toggling follow:", error);
     return { success: false, error: "Failed to update follow status" };
+  }
+}
+
+export async function getUserReplies(userId: string, currentUserId?: string) {
+  try {
+    const { like, bookmark } = await import("@/db/schema");
+
+    // Get replies by user with parent post info
+    const replies = await db
+      .select({
+        id: post.id,
+        content: post.content,
+        media: post.media,
+        likes: post.likes,
+        impressions: post.impressions,
+        createdAt: post.createdAt,
+        parentId: post.parentId,
+        commentsCount: sql<number>`(
+          SELECT COUNT(*)::int 
+          FROM ${post} AS comments 
+          WHERE comments.parent_id = ${post.id}
+        )`,
+        isLiked: currentUserId
+          ? sql<boolean>`EXISTS(
+              SELECT 1 FROM ${like} 
+              WHERE ${like.userId} = ${currentUserId} 
+              AND ${like.postId} = ${post.id}
+            )`
+          : sql<boolean>`false`,
+        isBookmarked: currentUserId
+          ? sql<boolean>`EXISTS(
+              SELECT 1 FROM ${bookmark} 
+              WHERE ${bookmark.userId} = ${currentUserId} 
+              AND ${bookmark.postId} = ${post.id}
+            )`
+          : sql<boolean>`false`,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        },
+      })
+      .from(post)
+      .innerJoin(user, eq(post.authorId, user.id))
+      .where(and(eq(post.authorId, userId), sql`${post.parentId} IS NOT NULL`))
+      .orderBy(desc(post.createdAt));
+
+    // Get parent posts info with full details
+    const repliesWithParent = await Promise.all(
+      replies.map(async (reply) => {
+        if (!reply.parentId) return { ...reply, parentPost: null };
+
+        const parentResult = await db
+          .select({
+            id: post.id,
+            content: post.content,
+            media: post.media,
+            likes: post.likes,
+            impressions: post.impressions,
+            createdAt: post.createdAt,
+            commentsCount: sql<number>`(
+              SELECT COUNT(*)::int 
+              FROM ${post} AS comments 
+              WHERE comments.parent_id = ${post.id}
+            )`,
+            isLiked: currentUserId
+              ? sql<boolean>`EXISTS(
+                  SELECT 1 FROM ${like} 
+                  WHERE ${like.userId} = ${currentUserId} 
+                  AND ${like.postId} = ${post.id}
+                )`
+              : sql<boolean>`false`,
+            isBookmarked: currentUserId
+              ? sql<boolean>`EXISTS(
+                  SELECT 1 FROM ${bookmark} 
+                  WHERE ${bookmark.userId} = ${currentUserId} 
+                  AND ${bookmark.postId} = ${post.id}
+                )`
+              : sql<boolean>`false`,
+            author: {
+              name: user.name,
+              username: user.username,
+              image: user.image,
+            },
+          })
+          .from(post)
+          .innerJoin(user, eq(post.authorId, user.id))
+          .where(eq(post.id, reply.parentId))
+          .limit(1);
+
+        return {
+          ...reply,
+          parentPost: parentResult[0] || null,
+        };
+      }),
+    );
+
+    return repliesWithParent;
+  } catch (error) {
+    console.error("Error fetching user replies:", error);
+    return [];
+  }
+}
+
+export async function getUserLikes(userId: string, currentUserId?: string) {
+  try {
+    const { like, bookmark } = await import("@/db/schema");
+
+    // Get posts liked by user
+    const likedPosts = await db
+      .select({
+        id: post.id,
+        content: post.content,
+        media: post.media,
+        likes: post.likes,
+        impressions: post.impressions,
+        createdAt: post.createdAt,
+        commentsCount: sql<number>`(
+          SELECT COUNT(*)::int 
+          FROM ${post} AS comments 
+          WHERE comments.parent_id = ${post.id}
+        )`,
+        isLiked: sql<boolean>`true`,
+        isBookmarked: currentUserId
+          ? sql<boolean>`EXISTS(
+              SELECT 1 FROM ${bookmark} 
+              WHERE ${bookmark.userId} = ${currentUserId} 
+              AND ${bookmark.postId} = ${post.id}
+            )`
+          : sql<boolean>`false`,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        },
+      })
+      .from(like)
+      .innerJoin(post, eq(like.postId, post.id))
+      .innerJoin(user, eq(post.authorId, user.id))
+      .where(eq(like.userId, userId))
+      .orderBy(desc(like.createdAt));
+
+    return likedPosts;
+  } catch (error) {
+    console.error("Error fetching user likes:", error);
+    return [];
+  }
+}
+
+export async function getUserBookmarks(userId: string, currentUserId?: string) {
+  try {
+    const { like, bookmark } = await import("@/db/schema");
+
+    // Get posts bookmarked by user
+    const bookmarkedPosts = await db
+      .select({
+        id: post.id,
+        content: post.content,
+        media: post.media,
+        likes: post.likes,
+        impressions: post.impressions,
+        createdAt: post.createdAt,
+        commentsCount: sql<number>`(
+          SELECT COUNT(*)::int 
+          FROM ${post} AS comments 
+          WHERE comments.parent_id = ${post.id}
+        )`,
+        isLiked: currentUserId
+          ? sql<boolean>`EXISTS(
+              SELECT 1 FROM ${like} 
+              WHERE ${like.userId} = ${currentUserId} 
+              AND ${like.postId} = ${post.id}
+            )`
+          : sql<boolean>`false`,
+        isBookmarked: sql<boolean>`true`,
+        author: {
+          id: user.id,
+          name: user.name,
+          username: user.username,
+          image: user.image,
+        },
+      })
+      .from(bookmark)
+      .innerJoin(post, eq(bookmark.postId, post.id))
+      .innerJoin(user, eq(post.authorId, user.id))
+      .where(eq(bookmark.userId, userId))
+      .orderBy(desc(bookmark.createdAt));
+
+    return bookmarkedPosts;
+  } catch (error) {
+    console.error("Error fetching user bookmarks:", error);
+    return [];
   }
 }

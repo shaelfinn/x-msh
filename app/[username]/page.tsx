@@ -4,7 +4,14 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { PostCard } from "@/components/home/post-card";
-import { getUserProfile, getUserPosts } from "@/app/actions/profile";
+import { ReplyCard } from "@/components/profile/reply-card";
+import {
+  getUserProfile,
+  getUserPosts,
+  getUserReplies,
+  getUserBookmarks,
+} from "@/app/actions/profile";
+import { getCurrentUser } from "@/lib/auth-server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -23,10 +30,16 @@ function formatTimeAgo(date: Date): string {
 
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ username: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { username } = await params;
+  const { tab = "posts" } = await searchParams;
+
+  // Get current user
+  const currentUser = await getCurrentUser();
 
   // Get user data from database
   const userData = await getUserProfile(username);
@@ -36,8 +49,23 @@ export default async function ProfilePage({
     notFound();
   }
 
-  // Get user posts
-  const posts = await getUserPosts(userData.id);
+  // Get posts based on active tab
+  let posts: any[] = [];
+  let emptyMessage = "No posts yet";
+
+  switch (tab) {
+    case "replies":
+      posts = await getUserReplies(userData.id, currentUser?.id);
+      emptyMessage = "No replies yet";
+      break;
+    case "bookmarks":
+      posts = await getUserBookmarks(userData.id, currentUser?.id);
+      emptyMessage = "No bookmarks yet";
+      break;
+    default:
+      posts = await getUserPosts(userData.id, currentUser?.id);
+      emptyMessage = "No posts yet";
+  }
 
   return (
     <>
@@ -60,29 +88,50 @@ export default async function ProfilePage({
           </div>
 
           <ProfileHeader userData={userData} />
-          <ProfileTabs />
+          <ProfileTabs username={username} />
 
           {posts.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
-              <p>No posts yet</p>
+              <p>{emptyMessage}</p>
             </div>
           ) : (
             <div>
-              {posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  id={Number(post.id)}
-                  author={post.author.name}
-                  username={post.author.username || ""}
-                  createdAt={formatTimeAgo(new Date(post.createdAt))}
-                  content={post.content}
-                  imageUrl={post.media?.[0] || null}
-                  avatarUrl={post.author.image}
-                  commentsCount={post.commentsCount}
-                  likesCount={post.likes}
-                  impressionsCount={post.impressions}
-                />
-              ))}
+              {tab === "replies"
+                ? posts.map((post) => (
+                    <ReplyCard
+                      key={post.id}
+                      id={post.id}
+                      author={post.author.name}
+                      username={post.author.username || ""}
+                      createdAt={formatTimeAgo(new Date(post.createdAt))}
+                      content={post.content}
+                      images={post.media}
+                      avatarUrl={post.author.image}
+                      commentsCount={post.commentsCount}
+                      likesCount={post.likes}
+                      impressionsCount={post.impressions}
+                      isLiked={post.isLiked}
+                      isBookmarked={post.isBookmarked}
+                      parentPost={post.parentPost}
+                    />
+                  ))
+                : posts.map((post) => (
+                    <PostCard
+                      key={post.id}
+                      id={post.id}
+                      author={post.author.name}
+                      username={post.author.username || ""}
+                      createdAt={formatTimeAgo(new Date(post.createdAt))}
+                      content={post.content}
+                      images={post.media}
+                      avatarUrl={post.author.image}
+                      commentsCount={post.commentsCount}
+                      likesCount={post.likes}
+                      impressionsCount={post.impressions}
+                      isLiked={post.isLiked}
+                      isBookmarked={post.isBookmarked}
+                    />
+                  ))}
             </div>
           )}
         </main>

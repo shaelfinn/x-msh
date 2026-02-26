@@ -2,33 +2,26 @@ import { Sidebar } from "@/components/shared/sidebar";
 import { Trending } from "@/components/home/trending";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { CommentsList } from "@/components/comments/list";
+import { PostDetailActions } from "@/components/comments/post-detail-actions";
+import { ImpressionTracker } from "@/components/home/impression-tracker";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeft,
-  MessageCircle,
-  Heart,
-  Bookmark,
-  BarChart2,
-  MoreHorizontal,
-} from "lucide-react";
+import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  mockPostsData,
-  getCommentsByPostId,
-  getUserById,
-} from "@/lib/mock-data";
-import { notFound } from "next/navigation";
+import { getPostById, getPostComments } from "@/app/actions/post";
+import { getCurrentUser } from "@/lib/auth-server";
+import { notFound, redirect } from "next/navigation";
 
-function formatNumber(num: number): string {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-  }
-  return num.toString();
+function formatFullDate(date: Date): string {
+  return date.toLocaleString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export default async function PostPage({
@@ -38,30 +31,22 @@ export default async function PostPage({
 }) {
   const { id } = await params;
 
-  // Get post data
-  const postData = mockPostsData.find((p) => p.id === parseInt(id));
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    redirect("/signin");
+  }
+
+  const postData = await getPostById(id, currentUser.id);
   if (!postData) {
     notFound();
   }
 
-  const user = getUserById(postData.userId);
-  if (!user) {
-    notFound();
-  }
-
-  const comments = getCommentsByPostId(parseInt(id));
-
-  const post = {
-    ...postData,
-    author: user.displayName,
-    username: user.username,
-    avatarUrl: user.avatarUrl,
-    commentsCount: comments.length,
-    bookmarksCount: 156, // Mock data for now
-  };
+  const comments = await getPostComments(id);
+  const imageCount = postData.media?.length || 0;
 
   return (
     <>
+      <ImpressionTracker postId={id} />
       <div className="flex min-h-screen pb-16 lg:pb-0">
         <Sidebar />
 
@@ -79,14 +64,26 @@ export default async function PostPage({
           <div className="border-b border-border p-4">
             <div className="flex gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src={post.avatarUrl} alt={post.author} />
-                <AvatarFallback>{post.author[0]}</AvatarFallback>
+                <AvatarImage
+                  src={postData.author.image || undefined}
+                  alt={postData.author.name}
+                />
+                <AvatarFallback>
+                  {postData.author.name[0]?.toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-bold hover:underline">{post.author}</p>
-                    <p className="text-muted-foreground">@{post.username}</p>
+                    <Link
+                      href={`/${postData.author.username}`}
+                      className="font-bold hover:underline"
+                    >
+                      {postData.author.name}
+                    </Link>
+                    <p className="text-muted-foreground">
+                      @{postData.author.username}
+                    </p>
                   </div>
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     <MoreHorizontal className="h-5 w-5" />
@@ -96,67 +93,65 @@ export default async function PostPage({
             </div>
 
             <div className="mt-3">
-              <p className="text-xl leading-relaxed whitespace-pre-wrap">
-                {post.content}
+              <p className="whitespace-pre-wrap text-xl leading-relaxed">
+                {postData.content}
               </p>
-              {post.imageUrl && (
-                <div className="mt-3 overflow-hidden rounded-2xl border border-border">
-                  <Image
-                    src={post.imageUrl}
-                    alt="Post image"
-                    width={600}
-                    height={400}
-                    className="w-full object-cover"
-                  />
+              {imageCount > 0 && (
+                <div
+                  className={`mt-3 grid gap-2 ${
+                    imageCount === 1
+                      ? "grid-cols-1"
+                      : imageCount === 2
+                        ? "grid-cols-2"
+                        : "grid-cols-2"
+                  }`}
+                >
+                  {postData.media!.map((imageUrl, index) => (
+                    <div
+                      key={index}
+                      className={`relative overflow-hidden rounded-2xl border border-border ${
+                        imageCount === 3 && index === 0 ? "col-span-2" : ""
+                      } ${
+                        imageCount === 1
+                          ? "h-96"
+                          : imageCount === 3 && index === 0
+                            ? "h-64"
+                            : "h-48"
+                      }`}
+                    >
+                      <Image
+                        src={imageUrl}
+                        alt={`Post image ${index + 1}`}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 600px"
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ))}
                 </div>
               )}
-              <p className="mt-4 text-muted-foreground">{post.createdAt}</p>
+              <p className="mt-4 text-muted-foreground">
+                {formatFullDate(new Date(postData.createdAt))}
+              </p>
             </div>
 
             {/* Actions */}
-            <div className="mt-4 flex justify-around border-y border-border py-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-muted-foreground hover:text-primary"
-              >
-                <MessageCircle className="h-5 w-5" />
-                <span className="text-sm">
-                  {formatNumber(post.commentsCount)}
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-muted-foreground hover:text-pink-600"
-              >
-                <Heart className="h-5 w-5" />
-                <span className="text-sm">{formatNumber(post.likesCount)}</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-muted-foreground hover:text-primary"
-              >
-                <BarChart2 className="h-5 w-5" />
-                <span className="text-sm">
-                  {formatNumber(post.impressionsCount)}
-                </span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-2 text-muted-foreground hover:text-primary"
-              >
-                <Bookmark className="h-5 w-5" />
-                <span className="text-sm">
-                  {formatNumber(post.bookmarksCount)}
-                </span>
-              </Button>
-            </div>
+            <PostDetailActions
+              postId={id}
+              commentsCount={postData.commentsCount}
+              likesCount={postData.likes}
+              impressionsCount={postData.impressions}
+              isLiked={postData.isLiked}
+              isBookmarked={postData.isBookmarked}
+            />
           </div>
 
-          <CommentsList postId={post.id} comments={comments} />
+          <CommentsList
+            postId={id}
+            comments={comments}
+            user={{ name: currentUser.name, image: currentUser.image ?? null }}
+          />
         </main>
 
         <Trending />

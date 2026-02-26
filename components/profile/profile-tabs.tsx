@@ -1,33 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 
-export function ProfileTabs() {
-  const [activeTab, setActiveTab] = useState("posts");
+interface ProfileTabsProps {
+  username: string;
+}
+
+export function ProfileTabs({ username }: ProfileTabsProps) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") || "posts";
 
   const tabs = [
     { id: "posts", label: "Posts" },
     { id: "replies", label: "Replies" },
-    { id: "media", label: "Media" },
-    { id: "likes", label: "Likes" },
+    { id: "bookmarks", label: "Bookmarks" },
   ];
 
   return (
     <div className="border-b border-border">
       <div className="flex">
         {tabs.map((tab) => (
-          <button
+          <Link
             key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`relative flex-1 py-4 font-bold transition-colors hover:bg-muted/50 ${
-              activeTab === tab.id ? "" : "text-muted-foreground"
+            href={`/${username}${tab.id === "posts" ? "" : `?tab=${tab.id}`}`}
+            className={`relative flex-1 py-4 text-center font-semibold transition-colors hover:bg-muted/50 ${
+              activeTab === tab.id ? "text-foreground" : "text-muted-foreground"
             }`}
           >
             {tab.label}
             {activeTab === tab.id && (
-              <span className="absolute bottom-0 left-1/2 h-1 w-14 -translate-x-1/2 rounded-full bg-[#1d9bf0]"></span>
+              <span className="absolute bottom-0 left-1/2 h-1 w-16 -translate-x-1/2 rounded-full bg-[#1d9bf0]"></span>
             )}
-          </button>
+          </Link>
         ))}
       </div>
     </div>
