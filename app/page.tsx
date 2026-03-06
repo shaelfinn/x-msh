@@ -67,6 +67,7 @@ export default async function Home() {
                   images={post.media}
                   avatarUrl={post.author.image}
                   commentsCount={post.commentsCount}
+                  repostsCount={0}
                   likesCount={post.likes}
                   impressionsCount={post.impressions}
                   isLiked={post.isLiked}

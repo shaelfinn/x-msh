@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PostCardActions } from "./post-card-actions";
 import { ImpressionTracker } from "./impression-tracker";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -27,6 +27,7 @@ interface PostCardProps {
   images?: string[] | null;
   avatarUrl?: string | null;
   commentsCount?: number;
+  repostsCount?: number;
   likesCount?: number;
   impressionsCount?: number;
   isLiked?: boolean;
@@ -42,6 +43,7 @@ export function PostCard({
   images,
   avatarUrl,
   commentsCount = 0,
+  repostsCount = 0,
   likesCount = 0,
   impressionsCount = 0,
   isLiked = false,
@@ -58,10 +60,11 @@ export function PostCard({
           className="shrink-0"
           onClick={(e) => e.stopPropagation()}
         >
-          <Avatar className="h-12 w-12 transition-opacity hover:opacity-80">
-            <AvatarImage src={avatarUrl || undefined} alt={author} />
-            <AvatarFallback>{author[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={avatarUrl}
+            name={author}
+            className="h-12 w-12 transition-opacity hover:opacity-80"
+          />
         </Link>
         <div className="flex-1">
           <div className="flex items-center justify-between">
@@ -142,6 +145,7 @@ export function PostCard({
           <PostCardActions
             postId={id}
             commentsCount={commentsCount}
+            repostsCount={repostsCount}
             likesCount={likesCount}
             impressionsCount={impressionsCount}
             isLiked={isLiked}

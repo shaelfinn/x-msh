@@ -1,7 +1,14 @@
-"use client";
+﻿"use client";
 
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Heart, Bookmark, BarChart2 } from "lucide-react";
+import {
+  MessageCircle,
+  Heart,
+  Bookmark,
+  BarChart2,
+  Repeat2,
+  Share,
+} from "lucide-react";
 import { toggleLike, toggleBookmark } from "@/app/actions/post";
 import { useState, useTransition } from "react";
 
@@ -18,6 +25,7 @@ function formatNumber(num: number): string {
 interface PostCardActionsProps {
   postId: string;
   commentsCount: number;
+  repostsCount: number;
   likesCount: number;
   impressionsCount: number;
   isLiked: boolean;
@@ -27,6 +35,7 @@ interface PostCardActionsProps {
 export function PostCardActions({
   postId,
   commentsCount,
+  repostsCount,
   likesCount: initialLikesCount,
   impressionsCount,
   isLiked: initialIsLiked,
@@ -70,63 +79,97 @@ export function PostCardActions({
   };
 
   return (
-    <div className="mt-3 flex max-w-md justify-between">
+    <div className="mt-3 flex items-center justify-between max-w-[425px]">
       <Button
         variant="ghost"
         size="sm"
-        className="gap-2 text-muted-foreground hover:text-primary"
+        className="-ml-2 gap-1 text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
       >
-        <MessageCircle className="h-5 w-5" />
+        <MessageCircle className="h-[18px] w-[18px]" />
         {commentsCount > 0 && (
-          <span className="text-sm">{formatNumber(commentsCount)}</span>
+          <span className="text-[13px]">{formatNumber(commentsCount)}</span>
         )}
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
-        className={`gap-2 transition-colors ${
+        className="gap-1 text-muted-foreground hover:text-[#00ba7c] hover:bg-[#00ba7c]/10"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <Repeat2 className="h-[18px] w-[18px]" />
+        {repostsCount > 0 && (
+          <span className="text-[13px]">{formatNumber(repostsCount)}</span>
+        )}
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`gap-1 transition-colors ${
           isLiked
-            ? "text-pink-600 hover:text-pink-700"
-            : "text-muted-foreground hover:text-pink-600"
+            ? "text-pink-600 hover:text-pink-700 hover:bg-pink-600/10"
+            : "text-muted-foreground hover:text-pink-600 hover:bg-pink-600/10"
         }`}
         onClick={handleLike}
         disabled={isPending}
       >
-        <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+        <Heart
+          className={`h-[18px] w-[18px] ${isLiked ? "fill-current" : ""}`}
+        />
         {likesCount > 0 && (
-          <span className="text-sm">{formatNumber(likesCount)}</span>
+          <span className="text-[13px]">{formatNumber(likesCount)}</span>
         )}
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
-        className="gap-2 text-muted-foreground hover:text-primary"
+        className="gap-1 text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
       >
-        <BarChart2 className="h-5 w-5" />
+        <BarChart2 className="h-[18px] w-[18px]" />
         {impressionsCount > 0 && (
-          <span className="text-sm">{formatNumber(impressionsCount)}</span>
+          <span className="text-[13px]">{formatNumber(impressionsCount)}</span>
         )}
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
         className={`transition-colors ${
           isBookmarked
-            ? "text-[#1d9bf0] hover:text-[#1a8cd8]"
-            : "text-muted-foreground hover:text-primary"
+            ? "text-[#1d9bf0] hover:text-[#1a8cd8] hover:bg-[#1d9bf0]/10"
+            : "text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
         }`}
         onClick={handleBookmark}
         disabled={isPending}
       >
-        <Bookmark className={`h-5 w-5 ${isBookmarked ? "fill-current" : ""}`} />
+        <Bookmark
+          className={`h-[18px] w-[18px] ${isBookmarked ? "fill-current" : ""}`}
+        />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        className="-mr-2 text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+      >
+        <Share className="h-[18px] w-[18px]" />
       </Button>
     </div>
   );

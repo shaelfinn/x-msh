@@ -171,6 +171,7 @@ export function ReplyCard({
               <PostCardActions
                 postId={parentPost.id}
                 commentsCount={parentPost.commentsCount}
+                repostsCount={0}
                 likesCount={parentPost.likes}
                 impressionsCount={parentPost.impressions}
                 isLiked={parentPost.isLiked}
@@ -269,6 +270,7 @@ export function ReplyCard({
             <PostCardActions
               postId={id}
               commentsCount={commentsCount}
+              repostsCount={0}
               likesCount={likesCount}
               impressionsCount={impressionsCount}
               isLiked={isLiked}

@@ -91,6 +91,7 @@ export function ProfilePostCard({
       <PostCardActions
         postId={id}
         commentsCount={commentsCount}
+        repostsCount={0}
         likesCount={likesCount}
         impressionsCount={impressionsCount}
         isLiked={isLiked}

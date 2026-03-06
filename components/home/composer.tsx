@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Smile,
@@ -15,6 +14,7 @@ import { useState, useRef } from "react";
 import { createPost } from "@/app/actions/post";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface ComposerProps {
   user: {
@@ -158,10 +158,7 @@ export function Composer({ user }: ComposerProps) {
   return (
     <div className="border-b border-border p-4">
       <div className="flex gap-3">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={user.image || undefined} alt={user.name} />
-          <AvatarFallback>{user.name[0]?.toUpperCase()}</AvatarFallback>
-        </Avatar>
+        <UserAvatar src={user.image} name={user.name} className="h-12 w-12" />
         <div className="flex-1">
           <textarea
             placeholder="What is happening?!"
