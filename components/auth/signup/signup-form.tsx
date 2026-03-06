@@ -40,7 +40,6 @@ export function SignUpForm() {
     if (signUpError) {
       const errorMsg = signUpError.message || "Failed to sign up";
 
-      // Set field-specific errors
       if (errorMsg.toLowerCase().includes("name")) {
         setFieldErrors({ name: errorMsg });
       } else if (errorMsg.toLowerCase().includes("email")) {

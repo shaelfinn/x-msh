@@ -37,7 +37,6 @@ export function SignInForm() {
     if (signInError) {
       const errorMsg = signInError.message || "Failed to sign in";
 
-      // Set field-specific errors
       if (errorMsg.toLowerCase().includes("email")) {
         setFieldErrors({ email: errorMsg });
       } else if (errorMsg.toLowerCase().includes("password")) {
