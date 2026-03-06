@@ -7,9 +7,20 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 
+export async function detectCountry(): Promise<string | null> {
+  try {
+    const headersList = await headers();
+    // Vercel provides geo headers
+    const country = headersList.get("x-vercel-ip-country");
+    return country || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function setupUserProfile(data: {
   username: string;
-  country: string;
+  country?: string;
 }) {
   try {
     // Get current session
@@ -47,15 +58,21 @@ export async function setupUserProfile(data: {
       return { error: "Username is already taken" };
     }
 
-    // Update user
-    await db
-      .update(user)
-      .set({
-        username: newUsername,
-        country: country || "KE",
-        updatedAt: new Date(),
-      })
-      .where(eq(user.id, session.user.id));
+    // Update user - only set country if provided
+    const updateData: {
+      username: string;
+      country?: string;
+      updatedAt: Date;
+    } = {
+      username: newUsername,
+      updatedAt: new Date(),
+    };
+
+    if (country) {
+      updateData.country = country;
+    }
+
+    await db.update(user).set(updateData).where(eq(user.id, session.user.id));
 
     // Revalidate to update session
     revalidatePath("/");
