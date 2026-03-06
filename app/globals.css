@@ -122,5 +122,28 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* Twitter/X-like font sizes */
+  h1 {
+    @apply text-xl font-bold;
+  }
+
+  /* Post content */
+  .post-content {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  /* Username and metadata */
+  .text-metadata {
+    font-size: 13px;
+  }
+
+  /* Buttons and actions */
+  button {
+    font-size: 14px;
   }
 }

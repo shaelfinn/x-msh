@@ -68,20 +68,22 @@ export function PostCard({
             <div className="flex items-center gap-1 overflow-hidden">
               <Link
                 href={`/${username}`}
-                className="max-w-[150px] truncate font-bold hover:underline"
+                className="max-w-[150px] truncate text-[15px] font-bold hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 {author}
               </Link>
               <Link
                 href={`/${username}`}
-                className="shrink-0 text-muted-foreground hover:underline"
+                className="shrink-0 text-[15px] text-muted-foreground hover:underline"
                 onClick={(e) => e.stopPropagation()}
               >
                 @{username}
               </Link>
-              <span className="shrink-0 text-muted-foreground">·</span>
-              <span className="shrink-0 text-muted-foreground">
+              <span className="shrink-0 text-[15px] text-muted-foreground">
+                ·
+              </span>
+              <span className="shrink-0 text-[15px] text-muted-foreground">
                 {createdAt}
               </span>
             </div>
@@ -90,7 +92,9 @@ export function PostCard({
             </Button>
           </div>
           <Link href={`/${username}/post/${id}`} className="block">
-            <p className="mt-1 whitespace-pre-wrap">{content}</p>
+            <p className="mt-1 whitespace-pre-wrap text-[15px] leading-5">
+              {content}
+            </p>
 
             {imageCount > 0 && (
               <div
