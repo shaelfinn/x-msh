@@ -6,7 +6,7 @@ export async function MobileHeader() {
   const user = await getCurrentUser();
 
   return (
-    <div className="flex h-14 items-center justify-between px-4 lg:justify-center">
+    <div className="flex h-12 items-center justify-between px-4 lg:justify-center">
       {user && (
         <Link href={`/${user.username}`} className="lg:hidden">
           <UserAvatar src={user.image} name={user.name} className="h-8 w-8" />

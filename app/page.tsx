@@ -1,7 +1,6 @@
 import { Sidebar } from "@/components/shared/sidebar";
 import { PostCard } from "@/components/home/post-card";
 import { Trending } from "@/components/home/trending";
-import { Composer } from "@/components/home/composer";
 import { MobileHeader } from "@/components/shared/mobile-header";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { getPosts } from "@/app/actions/post";
@@ -48,8 +47,6 @@ export default async function Home() {
             </div>
           </div>
 
-          <Composer user={{ name: user.name, image: user.image ?? null }} />
-
           {posts.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <p>No posts yet. Be the first to post!</p>
@@ -66,6 +63,7 @@ export default async function Home() {
                   content={post.content}
                   images={post.media}
                   avatarUrl={post.author.image}
+                  bio={post.author.bio}
                   commentsCount={post.commentsCount}
                   repostsCount={0}
                   likesCount={post.likes}

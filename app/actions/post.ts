@@ -100,6 +100,7 @@ export async function getPosts(userId?: string) {
           name: user.name,
           username: user.username,
           image: user.image,
+          bio: user.bio,
         },
       })
       .from(post)

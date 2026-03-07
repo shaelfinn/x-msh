@@ -26,6 +26,7 @@ interface PostCardProps {
   content: string;
   images?: string[] | null;
   avatarUrl?: string | null;
+  bio?: string | null;
   commentsCount?: number;
   repostsCount?: number;
   likesCount?: number;
@@ -42,6 +43,7 @@ export function PostCard({
   content,
   images,
   avatarUrl,
+  bio,
   commentsCount = 0,
   repostsCount = 0,
   likesCount = 0,
@@ -54,104 +56,83 @@ export function PostCard({
   return (
     <div className="border-b border-border p-4 transition-colors hover:bg-muted/30">
       <ImpressionTracker postId={id} />
-      <div className="flex gap-3">
-        <Link
-          href={`/${username}`}
-          className="shrink-0"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <UserAvatar
-            src={avatarUrl}
-            name={author}
-            className="h-12 w-12 transition-opacity hover:opacity-80"
-          />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1 overflow-hidden">
-              <Link
-                href={`/${username}`}
-                className="max-w-[150px] truncate text-[15px] font-bold hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {author}
-              </Link>
-              <Link
-                href={`/${username}`}
-                className="shrink-0 text-[15px] text-muted-foreground hover:underline"
-                onClick={(e) => e.stopPropagation()}
-              >
-                @{username}
-              </Link>
-              <span className="shrink-0 text-[15px] text-muted-foreground">
-                ·
-              </span>
-              <span className="shrink-0 text-[15px] text-muted-foreground">
-                {createdAt}
-              </span>
-            </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
-              <MoreHorizontal className="h-5 w-5" />
-            </Button>
-          </div>
-          <Link href={`/${username}/post/${id}`} className="block">
-            <p className="mt-1 whitespace-pre-wrap text-[15px] leading-5">
-              {content}
-            </p>
-
-            {imageCount > 0 && (
-              <div
-                className={`mt-3 grid gap-2 ${
-                  imageCount === 1
-                    ? "grid-cols-1"
-                    : imageCount === 2
-                      ? "grid-cols-2"
-                      : "grid-cols-2"
-                }`}
-              >
-                {images!.map((imageUrl, index) => (
-                  <div
-                    key={index}
-                    className={`relative overflow-hidden rounded-2xl border border-border ${
-                      imageCount === 3 && index === 0 ? "col-span-2" : ""
-                    } ${
-                      imageCount === 1
-                        ? "h-96"
-                        : imageCount === 3 && index === 0
-                          ? "h-64"
-                          : "h-48"
-                    }`}
-                  >
-                    <Image
-                      src={imageUrl}
-                      alt={`Post image ${index + 1}`}
-                      fill
-                      sizes={
-                        imageCount === 1
-                          ? "(max-width: 768px) 100vw, 600px"
-                          : imageCount === 3 && index === 0
-                            ? "(max-width: 768px) 100vw, 600px"
-                            : "(max-width: 768px) 50vw, 300px"
-                      }
-                      className="object-cover"
-                      loading="lazy"
-                      unoptimized
-                    />
-                  </div>
-                ))}
+      <div className="flex flex-col">
+        {/* Header with avatar inline */}
+        <div className="flex items-start justify-between mb-2">
+          <div className="flex items-center gap-2 overflow-hidden">
+            <Link
+              href={`/${username}`}
+              className="shrink-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <UserAvatar
+                src={avatarUrl}
+                name={author}
+                className="h-10 w-10 transition-opacity hover:opacity-80"
+              />
+            </Link>
+            <div className="flex flex-col overflow-hidden min-w-0">
+              <div className="flex items-center gap-1">
+                <Link
+                  href={`/${username}`}
+                  className="text-[14px] font-semibold hover:underline truncate"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {author}
+                </Link>
+                <span className="text-[12px] text-muted-foreground">·</span>
+                <span className="text-[12px] text-muted-foreground shrink-0">
+                  {createdAt}
+                </span>
               </div>
-            )}
-          </Link>
-          <PostCardActions
-            postId={id}
-            commentsCount={commentsCount}
-            repostsCount={repostsCount}
-            likesCount={likesCount}
-            impressionsCount={impressionsCount}
-            isLiked={isLiked}
-            isBookmarked={isBookmarked}
-          />
+              {bio && (
+                <p className="text-[12px] text-muted-foreground truncate">
+                  {bio}
+                </p>
+              )}
+            </div>
+          </div>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+            <MoreHorizontal className="h-5 w-5" />
+          </Button>
         </div>
+
+        {/* Content */}
+        <Link href={`/${username}/post/${id}`} className="block">
+          <p className="whitespace-pre-wrap text-[14px] leading-5">{content}</p>
+
+          {imageCount > 0 && (
+            <div className="mt-3">
+              <div className="relative overflow-hidden rounded-lg border border-border h-48">
+                <Image
+                  src={images![0]}
+                  alt="Post image"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  className="object-cover"
+                  loading="lazy"
+                  unoptimized
+                />
+                {imageCount > 1 && (
+                  <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[12px] font-medium px-2 py-1 rounded-md">
+                    +{imageCount - 1} more
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </Link>
+
+        {/* Actions */}
+        <PostCardActions
+          postId={id}
+          commentsCount={commentsCount}
+          repostsCount={repostsCount}
+          likesCount={likesCount}
+          impressionsCount={impressionsCount}
+          isLiked={isLiked}
+          isBookmarked={isBookmarked}
+        />
       </div>
     </div>
   );

@@ -6,7 +6,7 @@ import {
   Heart,
   Bookmark,
   BarChart2,
-  Repeat2,
+  Send,
   Share,
 } from "lucide-react";
 import { toggleLike, toggleBookmark } from "@/app/actions/post";
@@ -107,10 +107,7 @@ export function PostCardActions({
           e.stopPropagation();
         }}
       >
-        <Repeat2 className="h-[18px] w-[18px]" />
-        {repostsCount > 0 && (
-          <span className="text-[13px]">{formatNumber(repostsCount)}</span>
-        )}
+        <Send className="h-[18px] w-[18px]" />
       </Button>
 
       <Button
