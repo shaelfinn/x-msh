@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   Link as LinkIcon,
   Loader2,
+  DollarSign,
 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -61,57 +62,79 @@ export function ProfileHeader({ userData }: ProfileHeaderProps) {
   return (
     <>
       <div>
-        <div className="relative h-48 bg-muted">
+        {/* Cover Image */}
+        <div className="relative h-24 bg-muted">
           {userData.cover ? (
             <Image
               src={userData.cover}
               alt="Cover"
               fill
               className="object-cover"
+              unoptimized
             />
           ) : (
             <div className="h-full w-full bg-linear-to-br from-[#1d9bf0]/20 to-muted" />
           )}
         </div>
 
-        <div className="px-4">
-          <div className="flex items-start justify-between">
+        <div className="px-4 pb-4">
+          {/* Avatar and Action Buttons */}
+          <div className="flex items-start justify-between mb-4">
             <UserAvatar
               src={userData.image}
               name={userData.name}
-              className="-mt-16 h-32 w-32 border-4 border-background"
+              className="-mt-10 h-20 w-20 border-4 border-background"
             />
             {userData.isOwnProfile ? (
-              <Button
-                onClick={() => setIsEditOpen(true)}
-                className="mt-3 rounded-full px-6 font-bold"
-                variant="outline"
-              >
-                Edit profile
-              </Button>
+              <div className="mt-3 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 rounded-full border-border hover:bg-muted/50"
+                  title="Send tip"
+                >
+                  <DollarSign className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => setIsEditOpen(true)}
+                  className="h-9 rounded-full px-5 text-[15px] font-bold"
+                  variant="outline"
+                >
+                  Edit profile
+                </Button>
+              </div>
             ) : (
               <div className="mt-3 flex gap-2">
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 rounded-full"
+                  className="h-9 w-9 rounded-full border-border hover:bg-muted/50"
+                  title="Send message"
                 >
-                  <Mail className="h-5 w-5" />
+                  <Mail className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
-                  className="h-9 w-9 rounded-full"
+                  className="h-9 w-9 rounded-full border-border hover:bg-muted/50"
+                  title="Send tip"
                 >
-                  <MoreHorizontal className="h-5 w-5" />
+                  <DollarSign className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 rounded-full border-border hover:bg-muted/50"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
                 </Button>
                 <Button
                   onClick={handleFollowClick}
                   disabled={followLoading}
                   className={
                     isFollowing
-                      ? "rounded-full px-6 font-bold"
-                      : "rounded-full bg-[#1d9bf0] px-6 font-bold text-white hover:bg-[#1a8cd8]"
+                      ? "h-9 rounded-full px-5 text-[15px] font-bold border-border hover:bg-red-500/10 hover:border-red-500 hover:text-red-500"
+                      : "h-9 rounded-full bg-[#1d9bf0] px-5 text-[15px] font-bold text-white hover:bg-[#1a8cd8]"
                   }
                   variant={isFollowing ? "outline" : "default"}
                 >
@@ -127,14 +150,23 @@ export function ProfileHeader({ userData }: ProfileHeaderProps) {
             )}
           </div>
 
-          <div className="mt-4">
-            <h2 className="text-xl font-bold">{userData.name}</h2>
-            <p className="text-muted-foreground">@{userData.username}</p>
+          {/* Name and Username */}
+          <div>
+            <h2 className="text-[20px] font-bold leading-tight">
+              {userData.name}
+            </h2>
+            <p className="text-[15px] text-muted-foreground">
+              @{userData.username}
+            </p>
           </div>
 
-          {userData.bio && <p className="mt-3">{userData.bio}</p>}
+          {/* Bio */}
+          {userData.bio && (
+            <p className="mt-3 text-[15px] leading-relaxed">{userData.bio}</p>
+          )}
 
-          <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
+          {/* Metadata */}
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 text-[15px] text-muted-foreground">
             {userData.location && (
               <div className="flex items-center gap-1">
                 <MapPin className="h-4 w-4" />
@@ -160,7 +192,8 @@ export function ProfileHeader({ userData }: ProfileHeaderProps) {
             </div>
           </div>
 
-          <div className="mt-3 flex gap-4 text-sm">
+          {/* Following/Followers */}
+          <div className="mt-3 flex gap-5 text-[15px]">
             <button className="hover:underline">
               <span className="font-bold">{userData.followingCount}</span>{" "}
               <span className="text-muted-foreground">Following</span>

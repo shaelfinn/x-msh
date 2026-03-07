@@ -112,22 +112,22 @@ export function EditProfileDialog({
       >
         <DialogTitle className="sr-only">Edit profile</DialogTitle>
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-6">
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
               disabled={loading}
-              className="h-9 w-9 rounded-full"
+              className="h-9 w-9 rounded-full hover:bg-muted/50"
             >
               <X className="h-5 w-5" />
             </Button>
-            <h2 className="text-xl font-bold">Edit profile</h2>
+            <h2 className="text-[20px] font-bold">Edit profile</h2>
           </div>
           <Button
             onClick={handleSubmit}
             disabled={loading || !name.trim()}
-            className="rounded-full bg-[#1d9bf0] px-6 font-bold hover:bg-[#1a8cd8]"
+            className="h-9 rounded-full bg-[#1d9bf0] px-5 text-[15px] font-bold hover:bg-[#1a8cd8]"
           >
             {loading ? (
               <>
@@ -145,54 +145,55 @@ export function EditProfileDialog({
           className="max-h-[calc(90vh-3.5rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           <div className="relative">
-            <div className="relative h-48 bg-muted">
+            <div className="relative h-24 bg-muted">
               {coverPreview ? (
                 <Image
                   src={coverPreview}
                   alt="Cover"
                   fill
                   className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <div className="h-full w-full bg-linear-to-br from-[#1d9bf0]/20 to-muted" />
               )}
-              <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/40">
+              <div className="absolute inset-0 flex items-center justify-center gap-3 bg-black/40">
                 <Button
                   type="button"
                   variant="secondary"
                   size="icon"
-                  className="h-11 w-11 rounded-full bg-black/60 hover:bg-black/80"
+                  className="h-10 w-10 rounded-full bg-black/60 hover:bg-black/80"
                   onClick={() => coverInputRef.current?.click()}
                   disabled={loading}
                 >
-                  <Camera className="h-5 w-5 text-white" />
+                  <Camera className="h-4 w-4 text-white" />
                 </Button>
                 {coverPreview && (
                   <Button
                     type="button"
                     variant="secondary"
                     size="icon"
-                    className="h-11 w-11 rounded-full bg-black/60 hover:bg-black/80"
+                    className="h-10 w-10 rounded-full bg-black/60 hover:bg-black/80"
                     onClick={() => {
                       setCoverPreview(null);
                       setCoverFile(null);
                     }}
                     disabled={loading}
                   >
-                    <X className="h-5 w-5 text-white" />
+                    <X className="h-4 w-4 text-white" />
                   </Button>
                 )}
               </div>
             </div>
 
-            <div className="absolute left-4 top-32">
+            <div className="absolute left-4 top-14">
               <div className="relative">
-                <Avatar className="h-32 w-32 border-4 border-background">
+                <Avatar className="h-20 w-20 border-4 border-background">
                   <AvatarImage
                     src={imagePreview || undefined}
                     alt={userData.name}
                   />
-                  <AvatarFallback className="text-3xl">
+                  <AvatarFallback className="text-2xl">
                     {userData.name[0]?.toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
@@ -201,26 +202,26 @@ export function EditProfileDialog({
                     type="button"
                     variant="secondary"
                     size="icon"
-                    className="h-11 w-11 rounded-full bg-black/60 hover:bg-black/80"
+                    className="h-10 w-10 rounded-full bg-black/60 hover:bg-black/80"
                     onClick={() => imageInputRef.current?.click()}
                     disabled={loading}
                   >
-                    <Camera className="h-5 w-5 text-white" />
+                    <Camera className="h-4 w-4 text-white" />
                   </Button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-20 space-y-6 px-4 pb-6">
+          <div className="mt-14 space-y-5 px-4 pb-6">
             {error && (
-              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-[14px] text-destructive">
                 {error}
               </div>
             )}
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              <label className="mb-2 block text-[14px] font-medium text-muted-foreground">
                 Name
               </label>
               <Input
@@ -229,12 +230,12 @@ export function EditProfileDialog({
                 placeholder="Your name"
                 maxLength={50}
                 disabled={loading}
-                className="h-14 rounded-md border-border bg-background"
+                className="h-12 rounded-lg border-0 bg-muted/50 text-[15px] focus-visible:ring-2 focus-visible:ring-[#1d9bf0]"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              <label className="mb-2 block text-[14px] font-medium text-muted-foreground">
                 Bio
               </label>
               <textarea
@@ -244,15 +245,15 @@ export function EditProfileDialog({
                 maxLength={160}
                 rows={3}
                 disabled={loading}
-                className="w-full rounded-md border border-border bg-background px-3 py-3 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d9bf0] focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
+                className="w-full rounded-lg border-0 bg-muted/50 px-3 py-3 text-[15px] leading-relaxed ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1d9bf0] focus-visible:ring-offset-0 disabled:cursor-not-allowed disabled:opacity-50"
               />
-              <p className="mt-1 text-xs text-muted-foreground">
+              <p className="mt-1.5 text-[13px] text-muted-foreground">
                 {bio.length}/160
               </p>
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              <label className="mb-2 block text-[14px] font-medium text-muted-foreground">
                 Location
               </label>
               <Input
@@ -261,12 +262,12 @@ export function EditProfileDialog({
                 placeholder="Where are you based?"
                 maxLength={30}
                 disabled={loading}
-                className="h-14 rounded-md border-border bg-background"
+                className="h-12 rounded-lg border-0 bg-muted/50 text-[15px] focus-visible:ring-2 focus-visible:ring-[#1d9bf0]"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-muted-foreground">
+              <label className="mb-2 block text-[14px] font-medium text-muted-foreground">
                 Website
               </label>
               <Input
@@ -275,7 +276,7 @@ export function EditProfileDialog({
                 placeholder="https://example.com"
                 maxLength={100}
                 disabled={loading}
-                className="h-14 rounded-md border-border bg-background"
+                className="h-12 rounded-lg border-0 bg-muted/50 text-[15px] focus-visible:ring-2 focus-visible:ring-[#1d9bf0]"
               />
             </div>
           </div>

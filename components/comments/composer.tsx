@@ -96,9 +96,9 @@ export function CommentComposer({ postId, user }: CommentComposerProps) {
       <UserAvatar
         src={user?.image || null}
         name={user?.name || "You"}
-        className="h-10 w-10"
+        className="h-10 w-10 shrink-0"
       />
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div className="flex items-start gap-2">
           <textarea
             placeholder="Post your reply"
@@ -111,14 +111,14 @@ export function CommentComposer({ postId, user }: CommentComposerProps) {
                 handleSubmit();
               }
             }}
-            className="flex-1 resize-none bg-transparent text-lg outline-none placeholder:text-muted-foreground"
-            rows={isActive ? 2 : 1}
+            className="flex-1 resize-none bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
+            rows={isActive ? 3 : 1}
             disabled={isPending}
           />
           {!isActive && (
             <Button
               size="sm"
-              className="rounded-full bg-[#1d9bf0] px-4 font-bold text-white hover:bg-[#1a8cd8]"
+              className="h-9 rounded-full bg-[#1d9bf0] px-5 text-[15px] font-bold text-white hover:bg-[#1a8cd8]"
               disabled
             >
               Reply
@@ -126,7 +126,7 @@ export function CommentComposer({ postId, user }: CommentComposerProps) {
           )}
         </div>
         {isActive && (
-          <div className="mt-2 flex items-center justify-between">
+          <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center">
               {charCount > 0 && (
                 <CharacterCounter current={charCount} max={MAX_CHARS} />
@@ -134,7 +134,7 @@ export function CommentComposer({ postId, user }: CommentComposerProps) {
             </div>
             <Button
               onClick={handleSubmit}
-              className="rounded-full bg-[#1d9bf0] px-4 font-bold text-white hover:bg-[#1a8cd8] disabled:opacity-50"
+              className="h-9 rounded-full bg-[#1d9bf0] px-5 text-[15px] font-bold text-white hover:bg-[#1a8cd8] disabled:opacity-50"
               disabled={!commentText.trim() || isOverLimit || isPending}
             >
               {isPending ? "Posting..." : "Reply"}

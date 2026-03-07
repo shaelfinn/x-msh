@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { MessageCircle, Heart, Bookmark, BarChart2 } from "lucide-react";
+import {
+  MessageCircle,
+  Heart,
+  Bookmark,
+  BarChart2,
+  Send,
+  Share,
+} from "lucide-react";
 import { toggleLike, toggleBookmark } from "@/app/actions/post";
 import { useState, useTransition } from "react";
 
@@ -64,55 +71,74 @@ export function PostDetailActions({
   };
 
   return (
-    <div className="mt-4 flex justify-around border-y border-border py-3">
+    <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
       <Button
         variant="ghost"
         size="sm"
-        className="gap-2 text-muted-foreground hover:text-primary"
+        className="h-8 gap-1.5 text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 transition-colors"
       >
-        <MessageCircle className="h-5 w-5" />
+        <MessageCircle className="h-4 w-4" />
         {commentsCount > 0 && (
-          <span className="text-sm">{formatNumber(commentsCount)}</span>
+          <span className="text-[13px]">{formatNumber(commentsCount)}</span>
         )}
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
-        className={`gap-2 transition-colors ${
+        className="h-8 gap-1.5 text-muted-foreground hover:text-[#00ba7c] hover:bg-[#00ba7c]/10 transition-colors"
+      >
+        <Send className="h-4 w-4" />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        className={`h-8 gap-1.5 transition-colors ${
           isLiked
-            ? "text-pink-600 hover:text-pink-700"
-            : "text-muted-foreground hover:text-pink-600"
+            ? "text-pink-600 hover:text-pink-700 hover:bg-pink-600/10"
+            : "text-muted-foreground hover:text-pink-600 hover:bg-pink-600/10"
         }`}
         onClick={handleLike}
         disabled={isPending}
       >
-        <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+        <Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
         {likesCount > 0 && (
-          <span className="text-sm">{formatNumber(likesCount)}</span>
+          <span className="text-[13px]">{formatNumber(likesCount)}</span>
         )}
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
-        className="gap-2 text-muted-foreground hover:text-primary"
+        className="h-8 gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
       >
-        <BarChart2 className="h-5 w-5" />
+        <BarChart2 className="h-4 w-4" />
         {impressionsCount > 0 && (
-          <span className="text-sm">{formatNumber(impressionsCount)}</span>
+          <span className="text-[13px]">{formatNumber(impressionsCount)}</span>
         )}
       </Button>
+
       <Button
         variant="ghost"
         size="sm"
-        className={`transition-colors ${
+        className={`h-8 transition-colors ${
           isBookmarked
-            ? "text-[#1d9bf0] hover:text-[#1a8cd8]"
-            : "text-muted-foreground hover:text-primary"
+            ? "text-[#1d9bf0] hover:text-[#1a8cd8] hover:bg-[#1d9bf0]/10"
+            : "text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
         }`}
         onClick={handleBookmark}
         disabled={isPending}
       >
-        <Bookmark className={`h-5 w-5 ${isBookmarked ? "fill-current" : ""}`} />
+        <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`} />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="sm"
+        className="h-8 text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10 transition-colors"
+      >
+        <Share className="h-4 w-4" />
       </Button>
     </div>
   );

@@ -50,7 +50,7 @@ export default async function PostPage({
       <div className="flex min-h-screen pb-16 lg:pb-0">
         <Sidebar />
 
-        <main className="flex-1 border-r border-border">
+        <main className="flex-1 min-w-0 border-r border-border overflow-x-hidden">
           <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
             <div className="flex h-14 items-center gap-8 px-4">
               <Link href="/" className="rounded-full p-2 hover:bg-muted">
@@ -62,72 +62,64 @@ export default async function PostPage({
 
           {/* Post Detail */}
           <div className="border-b border-border p-4">
-            <div className="flex gap-3">
-              <UserAvatar
-                src={postData.author.image}
-                name={postData.author.name}
-                className="h-12 w-12"
-              />
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Link
-                      href={`/${postData.author.username}`}
-                      className="font-bold hover:underline"
-                    >
-                      {postData.author.name}
-                    </Link>
-                    <p className="text-muted-foreground">
-                      @{postData.author.username}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-5 w-5" />
-                  </Button>
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-center gap-2 overflow-hidden">
+                <Link
+                  href={`/${postData.author.username}`}
+                  className="shrink-0"
+                >
+                  <UserAvatar
+                    src={postData.author.image}
+                    name={postData.author.name}
+                    className="h-10 w-10 transition-opacity hover:opacity-80"
+                  />
+                </Link>
+                <div className="flex flex-col overflow-hidden min-w-0">
+                  <Link
+                    href={`/${postData.author.username}`}
+                    className="text-[14px] font-semibold hover:underline truncate"
+                  >
+                    {postData.author.name}
+                  </Link>
+                  <p className="text-[12px] text-muted-foreground truncate">
+                    @{postData.author.username}
+                  </p>
                 </div>
               </div>
+              <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                <MoreHorizontal className="h-5 w-5" />
+              </Button>
             </div>
 
             <div className="mt-3">
-              <p className="whitespace-pre-wrap text-xl leading-relaxed">
+              <p className="whitespace-pre-wrap text-[15px] leading-5">
                 {postData.content}
               </p>
+
+              {/* All Images - Horizontal Scroll */}
               {imageCount > 0 && (
-                <div
-                  className={`mt-3 grid gap-2 ${
-                    imageCount === 1
-                      ? "grid-cols-1"
-                      : imageCount === 2
-                        ? "grid-cols-2"
-                        : "grid-cols-2"
-                  }`}
-                >
-                  {postData.media!.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className={`relative overflow-hidden rounded-2xl border border-border ${
-                        imageCount === 3 && index === 0 ? "col-span-2" : ""
-                      } ${
-                        imageCount === 1
-                          ? "h-96"
-                          : imageCount === 3 && index === 0
-                            ? "h-64"
-                            : "h-48"
-                      }`}
-                    >
-                      <Image
-                        src={imageUrl}
-                        alt={`Post image ${index + 1}`}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 600px"
-                        className="object-cover"
-                        unoptimized
-                      />
-                    </div>
-                  ))}
+                <div className="mt-3">
+                  <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4">
+                    {postData.media!.map((imageUrl, index) => (
+                      <div
+                        key={index}
+                        className="relative shrink-0 w-64 h-48 overflow-hidden rounded-lg border border-border"
+                      >
+                        <Image
+                          src={imageUrl}
+                          alt={`Post image ${index + 1}`}
+                          fill
+                          sizes="256px"
+                          className="object-cover"
+                          unoptimized
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-              <p className="mt-4 text-muted-foreground">
+
+              <p className="mt-3 text-[13px] text-muted-foreground">
                 {formatFullDate(new Date(postData.createdAt))}
               </p>
             </div>
