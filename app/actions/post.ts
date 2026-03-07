@@ -24,8 +24,8 @@ export async function createPost(formData: FormData) {
       return { success: false, error: "Content is required" };
     }
 
-    if (content.length > 280) {
-      return { success: false, error: "Content exceeds 280 characters" };
+    if (content.length > 1000) {
+      return { success: false, error: "Content exceeds 1000 characters" };
     }
 
     // Create post in database - generate Twitter-style numeric ID
@@ -206,8 +206,8 @@ export async function createComment(postId: string, content: string) {
       return { success: false, error: "Content is required" };
     }
 
-    if (content.length > 280) {
-      return { success: false, error: "Content exceeds 280 characters" };
+    if (content.length > 1000) {
+      return { success: false, error: "Content exceeds 1000 characters" };
     }
 
     const commentId = `${Date.now()}${Math.floor(Math.random() * 1000000)}`;

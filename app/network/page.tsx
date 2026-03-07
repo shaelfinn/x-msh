@@ -1,6 +1,6 @@
 import { Sidebar } from "@/components/shared/sidebar";
 import { Trending } from "@/components/home/trending";
-import { MobileHeader } from "@/components/shared/mobile-header";
+import { Header } from "@/components/shared/header";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
@@ -49,9 +49,9 @@ export default async function NetworkPage({
       <div className="flex min-h-screen pb-16 lg:pb-0">
         <Sidebar />
 
-        <main className="flex-1 border-r border-border">
+        <main className="flex-1 min-w-0 border-r border-border">
           <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
-            <MobileHeader />
+            <Header />
             <div className="px-4 py-4">
               <div className="flex items-center gap-2 mb-1">
                 <Briefcase className="h-5 w-5 text-[#1d9bf0]" />

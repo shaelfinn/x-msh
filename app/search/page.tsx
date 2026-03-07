@@ -1,7 +1,7 @@
 import { Sidebar } from "@/components/shared/sidebar";
 import { Trending } from "@/components/home/trending";
 import { MobileNav } from "@/components/shared/mobile-nav";
-import { MobileHeader } from "@/components/shared/mobile-header";
+import { Header } from "@/components/shared/header";
 import { Button } from "@/components/ui/button";
 import { Search, Home } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +14,7 @@ export default function SearchPage() {
 
         <main className="flex-1 border-r border-border">
           <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
-            <MobileHeader />
+            <Header />
             <div className="hidden h-14 items-center px-4 lg:flex">
               <h1 className="text-xl font-bold">Search</h1>
             </div>

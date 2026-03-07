@@ -30,6 +30,7 @@ interface PostCardActionsProps {
   impressionsCount: number;
   isLiked: boolean;
   isBookmarked: boolean;
+  onCommentClick?: () => void;
 }
 
 export function PostCardActions({
@@ -40,6 +41,7 @@ export function PostCardActions({
   impressionsCount,
   isLiked: initialIsLiked,
   isBookmarked: initialIsBookmarked,
+  onCommentClick,
 }: PostCardActionsProps) {
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
@@ -90,6 +92,7 @@ export function PostCardActions({
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
+          onCommentClick?.();
         }}
       >
         <MessageCircle className="h-[18px] w-[18px]" />

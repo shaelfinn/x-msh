@@ -3,7 +3,7 @@ import { Trending } from "@/components/home/trending";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { MobileNav } from "@/components/shared/mobile-nav";
-import { PostCard } from "@/components/home/post-card";
+import { PostCard } from "@/components/home/posts";
 import { ReplyCard } from "@/components/profile/reply-card";
 import {
   getUserProfile,

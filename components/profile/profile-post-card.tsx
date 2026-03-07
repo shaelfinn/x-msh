@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { PostCardActions } from "../home/post-card-actions";
-import { ImpressionTracker } from "../home/impression-tracker";
+import { PostCardActions } from "../home/posts/post-card-actions";
+import { ImpressionTracker } from "../home/posts/impression-tracker";
 
 interface ProfilePostCardProps {
   id: string;

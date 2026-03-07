@@ -3,7 +3,7 @@ import { Trending } from "@/components/home/trending";
 import { MobileNav } from "@/components/shared/mobile-nav";
 import { CommentsList } from "@/components/comments/list";
 import { PostDetailActions } from "@/components/comments/post-detail-actions";
-import { ImpressionTracker } from "@/components/home/impression-tracker";
+import { ImpressionTracker } from "@/components/home/posts/impression-tracker";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import Link from "next/link";

@@ -1,8 +1,9 @@
 import { Sidebar } from "@/components/shared/sidebar";
-import { PostCard } from "@/components/home/post-card";
+import { PostCard } from "@/components/home/posts";
 import { Trending } from "@/components/home/trending";
-import { MobileHeader } from "@/components/shared/mobile-header";
+import { Header } from "@/components/shared/header";
 import { MobileNav } from "@/components/shared/mobile-nav";
+import { Spaces } from "@/components/home/spaces";
 import { getPosts } from "@/app/actions/post";
 import { getCurrentUser } from "@/lib/auth-server";
 import { redirect } from "next/navigation";
@@ -33,48 +34,42 @@ export default async function Home() {
       <div className="flex min-h-screen pb-16 lg:pb-0">
         <Sidebar />
 
-        <main className="flex-1 border-r border-border">
-          <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-sm">
-            <MobileHeader />
-            <div className="flex">
-              <button className="relative flex-1 py-4 font-bold transition-colors hover:bg-muted/50">
-                For you
-                <span className="absolute bottom-0 left-1/2 h-1 w-14 -translate-x-1/2 rounded-full bg-[#1d9bf0]"></span>
-              </button>
-              <button className="flex-1 py-4 text-muted-foreground transition-colors hover:bg-muted/50">
-                Following
-              </button>
-            </div>
-          </div>
+        <div className="flex-1 min-w-0 flex flex-col border-r border-border">
+          <main className="flex-1">
+            <Header />
 
-          {posts.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <p>No posts yet. Be the first to post!</p>
-            </div>
-          ) : (
-            <div>
-              {posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  id={post.id}
-                  author={post.author.name}
-                  username={post.author.username || ""}
-                  createdAt={formatTimeAgo(new Date(post.createdAt))}
-                  content={post.content}
-                  images={post.media}
-                  avatarUrl={post.author.image}
-                  bio={post.author.bio}
-                  commentsCount={post.commentsCount}
-                  repostsCount={0}
-                  likesCount={post.likes}
-                  impressionsCount={post.impressions}
-                  isLiked={post.isLiked}
-                  isBookmarked={post.isBookmarked}
-                />
-              ))}
-            </div>
-          )}
-        </main>
+            {/* Spaces - Horizontal scroll at top */}
+            <Spaces />
+
+            {posts.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                <p>No posts yet. Be the first to post!</p>
+              </div>
+            ) : (
+              <div>
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    id={post.id}
+                    author={post.author.name}
+                    username={post.author.username || ""}
+                    createdAt={formatTimeAgo(new Date(post.createdAt))}
+                    content={post.content}
+                    images={post.media}
+                    avatarUrl={post.author.image}
+                    bio={post.author.bio}
+                    commentsCount={post.commentsCount}
+                    repostsCount={0}
+                    likesCount={post.likes}
+                    impressionsCount={post.impressions}
+                    isLiked={post.isLiked}
+                    isBookmarked={post.isBookmarked}
+                  />
+                ))}
+              </div>
+            )}
+          </main>
+        </div>
 
         <Trending />
       </div>

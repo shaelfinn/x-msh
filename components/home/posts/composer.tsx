@@ -23,7 +23,7 @@ interface ComposerProps {
   };
 }
 
-const MAX_CHARS = 280;
+const MAX_CHARS = 1000;
 const MAX_IMAGES = 3;
 const MAX_TOTAL_SIZE = 4.5 * 1024 * 1024; // 4.5MB total (Vercel serverless limit)
 
