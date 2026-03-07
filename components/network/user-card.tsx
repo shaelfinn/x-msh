@@ -76,22 +76,24 @@ export function NetworkUserCard({ user }: NetworkUserCardProps) {
   };
 
   return (
-    <Link
-      href={`/${user.username}`}
-      className="block p-4 border-b border-border transition-colors hover:bg-muted/30 bg-zinc-900"
-    >
+    <div className="p-4 border-b border-border transition-colors hover:bg-muted/30">
       <div className="flex gap-3">
-        <UserAvatar
-          src={user.image}
-          name={user.name}
-          className="h-12 w-12 shrink-0"
-        />
+        <Link href={`/${user.username}`} className="shrink-0">
+          <UserAvatar
+            src={user.image}
+            name={user.name}
+            className="h-12 w-12 transition-opacity hover:opacity-80"
+          />
+        </Link>
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
+          <div className="flex items-start justify-between gap-2 mb-1">
             <div className="min-w-0 flex-1">
-              <h3 className="font-bold text-[15px] leading-tight">
+              <Link
+                href={`/${user.username}`}
+                className="font-bold text-[15px] leading-tight hover:underline"
+              >
                 {user.name}
-              </h3>
+              </Link>
               <p className="text-[13px] text-muted-foreground mt-0.5">
                 {mockData.expertise}
               </p>
@@ -99,7 +101,7 @@ export function NetworkUserCard({ user }: NetworkUserCardProps) {
             <Button
               onClick={handleFollowClick}
               disabled={loading}
-              className={`shrink-0 h-8 rounded-full px-4 text-[13px] font-bold ${
+              className={`shrink-0 h-8 rounded-full px-4 text-[13px] font-bold transition-all ${
                 isFollowing
                   ? "bg-transparent border border-border text-foreground hover:bg-red-500/10 hover:border-red-500 hover:text-red-500"
                   : "bg-[#1d9bf0] text-white hover:bg-[#1a8cd8]"
@@ -117,7 +119,7 @@ export function NetworkUserCard({ user }: NetworkUserCardProps) {
           </div>
 
           {user.bio && (
-            <p className="mt-2 text-[13px] text-muted-foreground line-clamp-2 leading-relaxed">
+            <p className="mt-2 text-[14px] leading-relaxed line-clamp-2">
               {user.bio}
             </p>
           )}
@@ -147,6 +149,6 @@ export function NetworkUserCard({ user }: NetworkUserCardProps) {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
