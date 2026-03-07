@@ -58,6 +58,8 @@ export default async function Home() {
                     images={post.media}
                     avatarUrl={post.author.image}
                     bio={post.author.bio}
+                    type={post.type as "offer" | "hire" | "collab" | "info"}
+                    price={post.price}
                     commentsCount={post.commentsCount}
                     repostsCount={0}
                     likesCount={post.likes}

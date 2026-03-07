@@ -82,6 +82,11 @@ export function PostCard({
     : null;
   const GigIcon = config?.icon || Handshake;
 
+  // Map type to image filename
+  const getImageName = () => {
+    return type; // Now files are named hire.jpg, offer.jpg, collab.jpg
+  };
+
   return (
     <div className="border-b border-border p-4 transition-colors hover:bg-muted/30">
       <ImpressionTracker postId={id} />
@@ -166,33 +171,47 @@ export function PostCard({
 
         {/* Gig Details - Only show if not info type */}
         {isGig && config && (
-          <div className="mb-1.5 rounded-lg border border-border bg-muted/30 p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 text-[13px]">
-                <div className="flex items-center gap-1.5 text-foreground font-semibold">
-                  <GigIcon className="h-4 w-4" />
-                  <span>{config.label}</span>
+          <div className="mb-1.5 rounded-lg overflow-hidden relative">
+            {/* Background Image */}
+            <div className="absolute inset-0 opacity-50">
+              <Image
+                src={`/posts/${getImageName()}.jpg`}
+                alt=""
+                fill
+                className="object-cover"
+                unoptimized
+              />
+            </div>
+
+            {/* Content */}
+            <div className="relative bg-gradient-to-r from-background/70 to-background/50 p-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 text-[13px]">
+                  <div className="flex items-center gap-1.5 text-foreground font-semibold">
+                    <GigIcon className="h-4 w-4" />
+                    <span>{config.label}</span>
+                  </div>
+                  {price ? (
+                    <div className="text-foreground font-semibold">
+                      ${price.toLocaleString()}
+                    </div>
+                  ) : type === "collab" ? (
+                    <div className="text-muted-foreground font-semibold">
+                      Free
+                    </div>
+                  ) : null}
                 </div>
-                {price ? (
-                  <div className="text-foreground font-semibold">
-                    ${price.toLocaleString()}
-                  </div>
-                ) : type === "collab" ? (
-                  <div className="text-muted-foreground font-semibold">
-                    Free
-                  </div>
-                ) : null}
+                <Button
+                  size="sm"
+                  className="h-8 rounded-full px-4 text-[13px] font-bold bg-[#1d9bf0] text-white hover:bg-[#1a8cd8] shrink-0"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  {config.buttonText}
+                </Button>
               </div>
-              <Button
-                size="sm"
-                className="h-8 rounded-full px-4 text-[13px] font-bold bg-[#1d9bf0] text-white hover:bg-[#1a8cd8] shrink-0"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                {config.buttonText}
-              </Button>
             </div>
           </div>
         )}
