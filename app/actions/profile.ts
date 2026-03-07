@@ -486,3 +486,127 @@ export async function getUserBookmarks(userId: string, currentUserId?: string) {
     return [];
   }
 }
+
+export async function getSuggestedUsers(currentUserId: string) {
+  try {
+    // Get users that current user is NOT following, excluding self
+    const suggestedUsers = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        image: user.image,
+        bio: user.bio,
+        followersCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${follow}
+          WHERE ${follow.followingId} = ${user.id}
+        )`,
+        isFollowing: sql<boolean>`EXISTS(
+          SELECT 1
+          FROM ${follow}
+          WHERE ${follow.followerId} = ${currentUserId}
+          AND ${follow.followingId} = ${user.id}
+        )`,
+      })
+      .from(user)
+      .where(
+        and(
+          sql`${user.id} != ${currentUserId}`,
+          sql`NOT EXISTS(
+            SELECT 1
+            FROM ${follow}
+            WHERE ${follow.followerId} = ${currentUserId}
+            AND ${follow.followingId} = ${user.id}
+          )`,
+        ),
+      )
+      .orderBy(
+        desc(sql`(
+        SELECT COUNT(*)::int
+        FROM ${follow}
+        WHERE ${follow.followingId} = ${user.id}
+      )`),
+      )
+      .limit(20);
+
+    return suggestedUsers;
+  } catch (error) {
+    console.error("Get suggested users error:", error);
+    return [];
+  }
+}
+
+export async function getTopRatedUsers(currentUserId: string) {
+  try {
+    // Get all users except current user, ordered by followers (simulating top rated)
+    const topUsers = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        image: user.image,
+        bio: user.bio,
+        followersCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${follow}
+          WHERE ${follow.followingId} = ${user.id}
+        )`,
+        isFollowing: sql<boolean>`EXISTS(
+          SELECT 1
+          FROM ${follow}
+          WHERE ${follow.followerId} = ${currentUserId}
+          AND ${follow.followingId} = ${user.id}
+        )`,
+      })
+      .from(user)
+      .where(sql`${user.id} != ${currentUserId}`)
+      .orderBy(
+        desc(sql`(
+        SELECT COUNT(*)::int
+        FROM ${follow}
+        WHERE ${follow.followingId} = ${user.id}
+      )`),
+      )
+      .limit(20);
+
+    return topUsers;
+  } catch (error) {
+    console.error("Get top rated users error:", error);
+    return [];
+  }
+}
+
+export async function getNewTalent(currentUserId: string) {
+  try {
+    // Get recently joined users
+    const newUsers = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        username: user.username,
+        image: user.image,
+        bio: user.bio,
+        followersCount: sql<number>`(
+          SELECT COUNT(*)::int
+          FROM ${follow}
+          WHERE ${follow.followingId} = ${user.id}
+        )`,
+        isFollowing: sql<boolean>`EXISTS(
+          SELECT 1
+          FROM ${follow}
+          WHERE ${follow.followerId} = ${currentUserId}
+          AND ${follow.followingId} = ${user.id}
+        )`,
+      })
+      .from(user)
+      .where(sql`${user.id} != ${currentUserId}`)
+      .orderBy(desc(user.createdAt))
+      .limit(20);
+
+    return newUsers;
+  } catch (error) {
+    console.error("Get new talent error:", error);
+    return [];
+  }
+}
