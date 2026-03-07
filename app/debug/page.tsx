@@ -1,13 +1,14 @@
 "use client";
 
-import { useSession } from "@/lib/auth-client";
-import { SignOutButton } from "@/components/auth/signout-button";
+import { useSession, signOut } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { LogOut, Loader2 } from "lucide-react";
 
 export default function DebugPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const [signingOut, setSigningOut] = useState(false);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -15,12 +16,18 @@ export default function DebugPage() {
     }
   }, [session, isPending, router]);
 
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await signOut();
+    router.push("/signin");
+  };
+
   if (isPending) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1d9bf0] mx-auto"></div>
-          <p className="mt-4 text-muted-foreground">Loading session...</p>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
         </div>
       </div>
     );
@@ -31,112 +38,40 @@ export default function DebugPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-card border border-border rounded-lg p-8">
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold">Debug Session</h1>
-            <SignOutButton />
+    <div className="min-h-screen bg-background">
+      <div className="p-4 space-y-4">
+        {/* Sign Out Button */}
+        <button
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 disabled:opacity-50 text-white font-semibold py-4 rounded-xl transition-colors"
+        >
+          {signingOut ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Signing out...
+            </>
+          ) : (
+            <>
+              <LogOut className="h-5 w-5" />
+              Sign Out
+            </>
+          )}
+        </button>
+
+        {/* Session Data */}
+        <div className="bg-muted/30 rounded-xl p-4 border border-border">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-[14px] font-semibold text-muted-foreground">
+              Session Data
+            </h2>
+            <span className="text-[12px] text-green-500 font-medium">
+              Active
+            </span>
           </div>
-
-          <div className="space-y-6">
-            <div>
-              <h2 className="text-xl font-semibold mb-4 text-[#1d9bf0]">
-                ✓ You are logged in!
-              </h2>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <h3 className="text-lg font-semibold mb-3">User Information</h3>
-              <div className="bg-muted/30 rounded-md p-4 space-y-2">
-                <div className="grid grid-cols-3 gap-4">
-                  <span className="font-medium text-muted-foreground">ID:</span>
-                  <span className="col-span-2">{session.user.id}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <span className="font-medium text-muted-foreground">
-                    Name:
-                  </span>
-                  <span className="col-span-2">{session.user.name}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <span className="font-medium text-muted-foreground">
-                    Email:
-                  </span>
-                  <span className="col-span-2">{session.user.email}</span>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <span className="font-medium text-muted-foreground">
-                    Email Verified:
-                  </span>
-                  <span className="col-span-2">
-                    {session.user.emailVerified ? "Yes" : "No"}
-                  </span>
-                </div>
-                {session.user.image && (
-                  <div className="grid grid-cols-3 gap-4">
-                    <span className="font-medium text-muted-foreground">
-                      Image:
-                    </span>
-                    <span className="col-span-2">{session.user.image}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <h3 className="text-lg font-semibold mb-3">
-                Session Information
-              </h3>
-              <div className="bg-muted/30 rounded-md p-4 space-y-2">
-                <div className="grid grid-cols-3 gap-4">
-                  <span className="font-medium text-muted-foreground">
-                    Session ID:
-                  </span>
-                  <span className="col-span-2 break-all">
-                    {session.session.id}
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <span className="font-medium text-muted-foreground">
-                    Expires At:
-                  </span>
-                  <span className="col-span-2">
-                    {new Date(session.session.expiresAt).toLocaleString()}
-                  </span>
-                </div>
-                {session.session.ipAddress && (
-                  <div className="grid grid-cols-3 gap-4">
-                    <span className="font-medium text-muted-foreground">
-                      IP Address:
-                    </span>
-                    <span className="col-span-2">
-                      {session.session.ipAddress}
-                    </span>
-                  </div>
-                )}
-                {session.session.userAgent && (
-                  <div className="grid grid-cols-3 gap-4">
-                    <span className="font-medium text-muted-foreground">
-                      User Agent:
-                    </span>
-                    <span className="col-span-2 text-sm break-all">
-                      {session.session.userAgent}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="border-t border-border pt-6">
-              <h3 className="text-lg font-semibold mb-3">
-                Full Session Object
-              </h3>
-              <pre className="bg-black/50 text-foreground rounded-md p-4 overflow-x-auto text-sm border border-border">
-                {JSON.stringify(session, null, 2)}
-              </pre>
-            </div>
-          </div>
+          <pre className="bg-black/50 text-foreground rounded-lg p-3 overflow-x-auto text-[12px] leading-relaxed">
+            {JSON.stringify(session, null, 2)}
+          </pre>
         </div>
       </div>
     </div>

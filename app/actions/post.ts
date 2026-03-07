@@ -18,6 +18,9 @@ export async function createPost(formData: FormData) {
     }
 
     const content = formData.get("content") as string;
+    const type =
+      (formData.get("type") as "info" | "offer" | "hire" | "collab") || "info";
+    const priceStr = formData.get("price") as string;
     const mediaUrls = formData.getAll("mediaUrls") as string[];
 
     if (!content?.trim()) {
@@ -28,6 +31,14 @@ export async function createPost(formData: FormData) {
       return { success: false, error: "Content exceeds 1000 characters" };
     }
 
+    // Validate price for offer and hire types
+    if (
+      (type === "offer" || type === "hire") &&
+      (!priceStr || parseInt(priceStr) <= 0)
+    ) {
+      return { success: false, error: `Price is required for ${type} posts` };
+    }
+
     // Create post in database - generate Twitter-style numeric ID
     const postId = `${Date.now()}${Math.floor(Math.random() * 1000000)}`;
 
@@ -36,6 +47,8 @@ export async function createPost(formData: FormData) {
       content: string;
       authorId: string;
       parentId: null;
+      type: "info" | "offer" | "hire" | "collab";
+      price?: number;
       likes: number;
       impressions: number;
       media?: string[];
@@ -44,9 +57,15 @@ export async function createPost(formData: FormData) {
       content: content.trim(),
       authorId: session.user.id,
       parentId: null,
+      type: type,
       likes: 0,
       impressions: 0,
     };
+
+    // Add price if provided
+    if (priceStr && parseInt(priceStr) > 0) {
+      postData.price = parseInt(priceStr);
+    }
 
     // Only add media if there are images
     if (mediaUrls.length > 0) {
@@ -73,6 +92,8 @@ export async function getPosts(userId?: string) {
         id: post.id,
         content: post.content,
         media: post.media,
+        type: post.type,
+        price: post.price,
         likes: post.likes,
         impressions: post.impressions,
         createdAt: post.createdAt,

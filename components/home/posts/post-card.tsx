@@ -1,13 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import {
-  MoreHorizontal,
-  DollarSign,
-  Clock,
-  Users,
-  Briefcase,
-} from "lucide-react";
+import { MoreHorizontal, Briefcase, Users, Handshake } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PostCardActions } from "./post-card-actions";
@@ -15,26 +9,6 @@ import { ImpressionTracker } from "./impression-tracker";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { QuickCommentBox } from "./quick-comment-box";
 import { useState } from "react";
-
-// Mock function to determine gig type and details based on content
-function getGigDetails(content: string, postId: string) {
-  const hash = postId
-    .split("")
-    .reduce((acc, char) => acc + char.charCodeAt(0), 0);
-
-  const types = ["hiring", "offering", "collaboration"];
-  const gigType = types[hash % types.length];
-
-  const budgets = [50, 100, 200, 500, 1000, 2000];
-  const durations = ["1-2 days", "3-5 days", "1 week", "2 weeks", "1 month"];
-
-  return {
-    type: gigType,
-    budget: budgets[hash % budgets.length],
-    duration: durations[hash % durations.length],
-    applicants: hash % 20,
-  };
-}
 
 interface PostCardProps {
   id: string;
@@ -45,6 +19,8 @@ interface PostCardProps {
   images?: string[] | null;
   avatarUrl?: string | null;
   bio?: string | null;
+  type?: "offer" | "hire" | "collab" | "info" | null;
+  price?: number | null;
   commentsCount?: number;
   repostsCount?: number;
   likesCount?: number;
@@ -62,6 +38,8 @@ export function PostCard({
   images,
   avatarUrl,
   bio,
+  type = "info",
+  price,
   commentsCount = 0,
   repostsCount = 0,
   likesCount = 0,
@@ -70,35 +48,39 @@ export function PostCard({
   isBookmarked = false,
 }: PostCardProps) {
   const imageCount = images?.length || 0;
-  const gigDetails = getGigDetails(content, id);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showCommentBox, setShowCommentBox] = useState(false);
 
   const gigTypeConfig = {
-    hiring: {
+    hire: {
       label: "Hiring",
       color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
       icon: Briefcase,
+      buttonText: "Apply",
     },
-    offering: {
-      label: "Offer",
+    offer: {
+      label: "Offering",
       color: "bg-green-500/10 text-green-600 border-green-500/20",
       icon: Briefcase,
+      buttonText: "Hire",
     },
-    collaboration: {
-      label: "Collab",
+    collab: {
+      label: "Collaboration",
       color: "bg-purple-500/10 text-purple-600 border-purple-500/20",
       icon: Users,
+      buttonText: "Join",
     },
   };
 
-  const config = gigTypeConfig[gigDetails.type as keyof typeof gigTypeConfig];
-  const GigIcon = config.icon;
-
-  // Determine if content needs truncation (more than 280 characters)
   const shouldTruncate = content.length > 280;
   const displayContent =
     shouldTruncate && !isExpanded ? content.slice(0, 280) + "..." : content;
+
+  const isGig = type && type !== "info";
+  const config = isGig
+    ? gigTypeConfig[type as keyof typeof gigTypeConfig]
+    : null;
+  const GigIcon = config?.icon || Handshake;
 
   return (
     <div className="border-b border-border p-4 transition-colors hover:bg-muted/30">
@@ -142,16 +124,6 @@ export function PostCard({
           </Button>
         </div>
 
-        {/* Gig Type Badge */}
-        {/* <div className="mb-2">
-          <span
-            className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium border ${config.color}`}
-          >
-            <GigIcon className="h-3 w-3" />
-            {config.label}
-          </span>
-        </div> */}
-
         {/* Content */}
         <Link href={`/${username}/post/${id}`} className="block">
           <p className="whitespace-pre-wrap text-[14px] leading-5 mb-1.5">
@@ -175,7 +147,7 @@ export function PostCard({
               <div className="relative overflow-hidden rounded-lg border border-border h-48">
                 <Image
                   src={images![0]}
-                  alt="Gig image"
+                  alt="Post image"
                   fill
                   sizes="(max-width: 768px) 100vw, 600px"
                   className="object-cover"
@@ -192,53 +164,25 @@ export function PostCard({
           )}
         </Link>
 
-        {/* Gig Details Card */}
-        <div className="mb-1.5 rounded-lg overflow-hidden relative">
-          {/* Background Image */}
-          <div className="absolute inset-0 opacity-40">
-            <Image
-              src={`/posts/${gigDetails.type}.jpg`}
-              alt=""
-              fill
-              className="object-cover"
-              unoptimized
-            />
-          </div>
-
-          {/* Content */}
-          <div className="relative bg-linear-to-r from-background/70 to-background/50 p-2.5">
+        {/* Gig Details - Only show if not info type */}
+        {isGig && config && (
+          <div className="mb-1.5 rounded-lg border border-border bg-muted/30 p-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3 text-[13px]">
-                {/* Gig Type */}
                 <div className="flex items-center gap-1.5 text-foreground font-semibold">
                   <GigIcon className="h-4 w-4" />
                   <span>{config.label}</span>
                 </div>
-
-                {/* Budget */}
-                {gigDetails.type !== "collaboration" && (
-                  <div className="flex items-center gap-1 text-foreground">
-                    <DollarSign className="h-4 w-4 text-[#00ba7c]" />
-                    <span className="font-semibold">${gigDetails.budget}</span>
+                {price ? (
+                  <div className="text-foreground font-semibold">
+                    ${price.toLocaleString()}
                   </div>
-                )}
-
-                {/* Duration */}
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="h-3.5 w-3.5" />
-                  <span>{gigDetails.duration}</span>
-                </div>
-
-                {/* Applicants */}
-                {gigDetails.applicants > 0 && (
-                  <div className="flex items-center gap-1 text-muted-foreground">
-                    <Users className="h-3.5 w-3.5" />
-                    <span>{gigDetails.applicants}</span>
+                ) : type === "collab" ? (
+                  <div className="text-muted-foreground font-semibold">
+                    Free
                   </div>
-                )}
+                ) : null}
               </div>
-
-              {/* Action Button */}
               <Button
                 size="sm"
                 className="h-8 rounded-full px-4 text-[13px] font-bold bg-[#1d9bf0] text-white hover:bg-[#1a8cd8] shrink-0"
@@ -247,15 +191,11 @@ export function PostCard({
                   e.stopPropagation();
                 }}
               >
-                {gigDetails.type === "hiring"
-                  ? "Apply"
-                  : gigDetails.type === "offering"
-                    ? "Hire"
-                    : "Join"}
+                {config.buttonText}
               </Button>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Actions */}
         <PostCardActions

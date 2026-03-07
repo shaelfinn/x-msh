@@ -6,6 +6,7 @@ import { signUp, signIn } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+import Image from "next/image";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 
 export function SignUpForm() {
@@ -77,13 +78,15 @@ export function SignUpForm() {
   return (
     <div className="w-full max-w-[400px] mx-auto px-4">
       <div className="mb-8 text-center">
-        <svg
-          viewBox="0 0 24 24"
-          className="h-8 w-8 fill-foreground mx-auto mb-6"
-          aria-hidden="true"
-        >
-          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-        </svg>
+        <div className="relative h-10 w-40 mx-auto mb-6">
+          <Image
+            src="/logo-text.png"
+            alt="Logo"
+            fill
+            className="object-contain"
+            priority
+          />
+        </div>
         <h1 className="text-[28px] font-bold leading-tight">Join today</h1>
       </div>
 

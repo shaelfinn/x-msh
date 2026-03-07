@@ -1,6 +1,6 @@
 "use client";
 
-import { Home, Users, Bell, Mail, Plus } from "lucide-react";
+import { Home, Users, Bell, Bug, Plus } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -12,7 +12,7 @@ export function MobileNav() {
     { href: "/network", icon: Users, label: "Network" },
     { href: "/create", icon: Plus, label: "Create" },
     { href: "/notifications", icon: Bell, label: "Notifications" },
-    { href: "/messages", icon: Mail, label: "Messages" },
+    { href: "/debug", icon: Bug, label: "Debug" },
   ];
 
   return (

@@ -8,6 +8,13 @@
       "when": 1771617884951,
       "tag": "0000_glamorous_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772891918399,
+      "tag": "0001_brown_silhouette",
+      "breakpoints": true
     }
   ]
 }
