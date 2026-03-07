@@ -104,14 +104,37 @@ export function Composer({ user }: ComposerProps) {
       const validImages = images.filter((img): img is File => img !== null);
 
       if (validImages.length > 0) {
-        for (const image of validImages) {
-          const response = await fetch(
-            `/api/upload?filename=${encodeURIComponent(image.name)}`,
-            { method: "POST", body: image },
-          );
-          if (!response.ok) throw new Error("Failed to upload image");
-          const { url } = await response.json();
-          mediaUrls.push(url);
+        for (let i = 0; i < validImages.length; i++) {
+          const image = validImages[i];
+          try {
+            const response = await fetch(
+              `/api/upload?filename=${encodeURIComponent(image.name)}`,
+              { method: "POST", body: image },
+            );
+
+            if (!response.ok) {
+              const errorData = await response.json().catch(() => ({}));
+              if (response.status === 401) {
+                throw new Error("Authentication failed. Please sign in again.");
+              } else if (response.status === 400) {
+                throw new Error(errorData.error || "Invalid file");
+              } else {
+                throw new Error(
+                  errorData.error || `Upload failed (${response.status})`,
+                );
+              }
+            }
+
+            const { url } = await response.json();
+            mediaUrls.push(url);
+          } catch (uploadError) {
+            if (uploadError instanceof TypeError) {
+              throw new Error(
+                `Network error uploading image ${i + 1}. Check your connection.`,
+              );
+            }
+            throw uploadError;
+          }
         }
       }
 
@@ -130,8 +153,12 @@ export function Composer({ user }: ComposerProps) {
       } else {
         setError(result.error || "Failed to create post");
       }
-    } catch {
-      setError("Failed to upload images. Please try again.");
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to upload images. Please try again.";
+      setError(errorMessage);
     }
 
     setLoading(false);
