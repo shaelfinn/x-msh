@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+﻿import { UserAvatar } from "@/components/ui/user-avatar";
 import { Heart, MessageCircle, UserPlus } from "lucide-react";
 import Link from "next/link";
 
@@ -95,15 +95,11 @@ export function NotificationsList({ notifications }: NotificationsListProps) {
               <div className="shrink-0">{getNotificationIcon(notif.type)}</div>
               <div className="flex-1">
                 <div className="flex items-start gap-3">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={notif.sender.image || undefined}
-                      alt={notif.sender.name}
-                    />
-                    <AvatarFallback>
-                      {notif.sender.name[0]?.toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                  <UserAvatar
+                    src={notif.sender.image}
+                    name={notif.sender.name}
+                    className="h-10 w-10"
+                  />
                   <div className="flex-1">
                     <p className="text-sm">
                       <span className="font-bold">{notif.sender.name}</span>{" "}

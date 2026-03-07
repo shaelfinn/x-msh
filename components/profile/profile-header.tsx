@@ -1,6 +1,5 @@
 "use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Calendar,
@@ -15,6 +14,7 @@ import { useState } from "react";
 import { EditProfileDialog } from "./edit-profile-dialog";
 import { toggleFollow } from "@/app/actions/profile";
 import { useRouter } from "next/navigation";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface ProfileHeaderProps {
   userData: {
@@ -76,15 +76,11 @@ export function ProfileHeader({ userData }: ProfileHeaderProps) {
 
         <div className="px-4">
           <div className="flex items-start justify-between">
-            <Avatar className="-mt-16 h-32 w-32 border-4 border-background">
-              <AvatarImage
-                src={userData.image || undefined}
-                alt={userData.name}
-              />
-              <AvatarFallback className="text-3xl">
-                {userData.name[0]?.toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              src={userData.image}
+              name={userData.name}
+              className="-mt-16 h-32 w-32 border-4 border-background"
+            />
             {userData.isOwnProfile ? (
               <Button
                 onClick={() => setIsEditOpen(true)}

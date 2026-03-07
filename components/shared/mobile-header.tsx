@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+﻿import { UserAvatar } from "@/components/ui/user-avatar";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth-server";
 
@@ -9,10 +9,7 @@ export async function MobileHeader() {
     <div className="flex h-14 items-center justify-between px-4 lg:justify-center">
       {user && (
         <Link href={`/${user.username}`} className="lg:hidden">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image || undefined} alt={user.name} />
-            <AvatarFallback>{user.name[0]?.toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <UserAvatar src={user.image} name={user.name} className="h-8 w-8" />
         </Link>
       )}
       <svg

@@ -1,12 +1,12 @@
 "use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { PostCardActions } from "../home/post-card-actions";
 import { ImpressionTracker } from "../home/impression-tracker";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface ReplyCardProps {
   id: string;
@@ -83,15 +83,11 @@ export function ReplyCard({
                 className="shrink-0"
                 onClick={(e) => e.stopPropagation()}
               >
-                <Avatar className="h-12 w-12 transition-opacity hover:opacity-80">
-                  <AvatarImage
-                    src={parentPost.author.image || undefined}
-                    alt={parentPost.author.name}
-                  />
-                  <AvatarFallback>
-                    {parentPost.author.name[0]?.toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
+                <UserAvatar
+                  src={parentPost.author.image}
+                  name={parentPost.author.name}
+                  className="h-12 w-12 transition-opacity hover:opacity-80"
+                />
               </Link>
               <div className="w-0.5 flex-1 bg-border my-1" />
             </div>
@@ -190,10 +186,11 @@ export function ReplyCard({
             className="shrink-0"
             onClick={(e) => e.stopPropagation()}
           >
-            <Avatar className="h-12 w-12 transition-opacity hover:opacity-80">
-              <AvatarImage src={avatarUrl || undefined} alt={author} />
-              <AvatarFallback>{author[0]?.toUpperCase()}</AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              src={avatarUrl}
+              name={author}
+              className="h-12 w-12 transition-opacity hover:opacity-80"
+            />
           </Link>
           <div className="flex-1">
             <div className="flex items-center justify-between">

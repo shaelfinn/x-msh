@@ -10,7 +10,7 @@ import {
   Share,
 } from "lucide-react";
 import { toggleLike, toggleBookmark } from "@/app/actions/post";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 
 function formatNumber(num: number): string {
   if (num >= 1000000) {
@@ -44,19 +44,20 @@ export function PostCardActions({
   const [isLiked, setIsLiked] = useState(initialIsLiked);
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const [likesCount, setLikesCount] = useState(initialLikesCount);
-  const [isPending, startTransition] = useTransition();
 
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
+    // Instant UI update
     const newIsLiked = !isLiked;
     setIsLiked(newIsLiked);
     setLikesCount((prev) => (newIsLiked ? prev + 1 : prev - 1));
 
-    startTransition(async () => {
-      const result = await toggleLike(postId);
+    // Sync in background
+    toggleLike(postId).then((result) => {
       if (!result.success) {
+        // Revert on failure
         setIsLiked(!newIsLiked);
         setLikesCount((prev) => (newIsLiked ? prev - 1 : prev + 1));
       }
@@ -67,12 +68,14 @@ export function PostCardActions({
     e.preventDefault();
     e.stopPropagation();
 
+    // Instant UI update
     const newIsBookmarked = !isBookmarked;
     setIsBookmarked(newIsBookmarked);
 
-    startTransition(async () => {
-      const result = await toggleBookmark(postId);
+    // Sync in background
+    toggleBookmark(postId).then((result) => {
       if (!result.success) {
+        // Revert on failure
         setIsBookmarked(!newIsBookmarked);
       }
     });
@@ -119,7 +122,6 @@ export function PostCardActions({
             : "text-muted-foreground hover:text-pink-600 hover:bg-pink-600/10"
         }`}
         onClick={handleLike}
-        disabled={isPending}
       >
         <Heart
           className={`h-[18px] w-[18px] ${isLiked ? "fill-current" : ""}`}
@@ -153,7 +155,6 @@ export function PostCardActions({
             : "text-muted-foreground hover:text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
         }`}
         onClick={handleBookmark}
-        disabled={isPending}
       >
         <Bookmark
           className={`h-[18px] w-[18px] ${isBookmarked ? "fill-current" : ""}`}

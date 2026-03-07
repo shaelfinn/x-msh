@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/ui/user-avatar";
 import { Button } from "@/components/ui/button";
 import { useState, useTransition } from "react";
 import { createComment } from "@/app/actions/post";
@@ -93,10 +93,11 @@ export function CommentComposer({ postId, user }: CommentComposerProps) {
 
   return (
     <div className="flex gap-3 border-b border-border p-4">
-      <Avatar className="h-10 w-10">
-        <AvatarImage src={user?.image || undefined} alt={user?.name || "You"} />
-        <AvatarFallback>{user?.name?.[0]?.toUpperCase() || "U"}</AvatarFallback>
-      </Avatar>
+      <UserAvatar
+        src={user?.image || null}
+        name={user?.name || "You"}
+        className="h-10 w-10"
+      />
       <div className="flex-1">
         <div className="flex items-start gap-2">
           <textarea

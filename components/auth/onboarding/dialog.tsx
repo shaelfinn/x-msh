@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogOverlay, DialogPortal } from "@/components/ui/dialog";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, CheckCircle2 } from "lucide-react";
 import { setupUserProfile, detectCountry } from "@/app/actions/user";
 import countries from "i18n-iso-countries";
 import en from "i18n-iso-countries/langs/en.json";
+import { authClient } from "@/lib/auth-client";
 
 countries.registerLocale(en);
 
@@ -34,8 +34,6 @@ function generateUsername(name: string): string {
 }
 
 export function OnboardingDialog({ user }: OnboardingDialogProps) {
-  const router = useRouter();
-  const [, startTransition] = useTransition();
   const [step, setStep] = useState(1);
   const [username, setUsername] = useState(() =>
     user.name ? generateUsername(user.name) : "",
@@ -44,6 +42,7 @@ export function OnboardingDialog({ user }: OnboardingDialogProps) {
     null,
   );
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -82,9 +81,13 @@ export function OnboardingDialog({ user }: OnboardingDialogProps) {
         return;
       }
 
-      startTransition(() => {
-        router.refresh();
-      });
+      // Show success state
+      setSuccess(true);
+
+      // Force session refresh and reload
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 1000);
     } catch {
       setError("Something went wrong");
       setLoading(false);
@@ -101,7 +104,19 @@ export function OnboardingDialog({ user }: OnboardingDialogProps) {
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <div className="p-6 sm:p-8">
-            {step === 1 ? (
+            {success ? (
+              <div className="text-center space-y-6 py-4">
+                <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-[#00ba7c]/10">
+                  <CheckCircle2 className="h-10 w-10 text-[#00ba7c]" />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-2xl font-bold">All set!</h2>
+                  <p className="text-[15px] text-muted-foreground">
+                    Redirecting to your feed...
+                  </p>
+                </div>
+              </div>
+            ) : step === 1 ? (
               <>
                 <div className="mb-8 text-center space-y-3">
                   <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#1d9bf0]/10 mb-2">

@@ -4,7 +4,6 @@ import { MobileNav } from "@/components/shared/mobile-nav";
 import { CommentsList } from "@/components/comments/list";
 import { PostDetailActions } from "@/components/comments/post-detail-actions";
 import { ImpressionTracker } from "@/components/home/impression-tracker";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +11,7 @@ import Image from "next/image";
 import { getPostById, getPostComments } from "@/app/actions/post";
 import { getCurrentUser } from "@/lib/auth-server";
 import { notFound, redirect } from "next/navigation";
+import { UserAvatar } from "@/components/ui/user-avatar";
 
 function formatFullDate(date: Date): string {
   return date.toLocaleString("en-US", {
@@ -63,15 +63,11 @@ export default async function PostPage({
           {/* Post Detail */}
           <div className="border-b border-border p-4">
             <div className="flex gap-3">
-              <Avatar className="h-12 w-12">
-                <AvatarImage
-                  src={postData.author.image || undefined}
-                  alt={postData.author.name}
-                />
-                <AvatarFallback>
-                  {postData.author.name[0]?.toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
+              <UserAvatar
+                src={postData.author.image}
+                name={postData.author.name}
+                className="h-12 w-12"
+              />
               <div className="flex-1">
                 <div className="flex items-center justify-between">
                   <div>

@@ -1,4 +1,4 @@
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+﻿import { UserAvatar } from "@/components/ui/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Heart, BarChart2, Bookmark, MoreHorizontal } from "lucide-react";
 
@@ -34,16 +34,13 @@ export function CommentItem({
   return (
     <div className="border-b border-border p-4">
       <div className="flex gap-3">
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={avatarUrl || undefined} alt={author} />
-          <AvatarFallback>{author[0]}</AvatarFallback>
-        </Avatar>
+        <UserAvatar src={avatarUrl} name={author} className="h-10 w-10" />
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <span className="font-bold hover:underline">{author}</span>
               <span className="text-muted-foreground">@{username}</span>
-              <span className="text-muted-foreground">·</span>
+              <span className="text-muted-foreground">Â·</span>
               <span className="text-muted-foreground">{createdAt}</span>
             </div>
             <Button variant="ghost" size="icon" className="h-8 w-8">
