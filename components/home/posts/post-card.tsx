@@ -184,7 +184,7 @@ export function PostCard({
             </div>
 
             {/* Content */}
-            <div className="relative bg-gradient-to-r from-background/70 to-background/50 p-3">
+            <div className="relative bg-linear-to-r from-background/70 to-background/50 p-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 text-[13px]">
                   <div className="flex items-center gap-1.5 text-foreground font-semibold">

@@ -1,16 +1,12 @@
 import { relations } from "drizzle-orm";
 import { user } from "../auth/user";
 import { post } from "../social/post";
-import { like } from "../social/like";
 import { follow } from "../social/follow";
-import { bookmark } from "../social/bookmark";
 import { notification } from "../social/notification";
 
 // User relations
 export const userSocialRelations = relations(user, ({ many }) => ({
   posts: many(post),
-  likes: many(like),
-  bookmarks: many(bookmark),
   followers: many(follow, { relationName: "following" }),
   following: many(follow, { relationName: "follower" }),
   sentNotifications: many(notification, { relationName: "sender" }),
@@ -29,21 +25,7 @@ export const postRelations = relations(post, ({ one, many }) => ({
     relationName: "comments",
   }),
   comments: many(post, { relationName: "comments" }),
-  likes: many(like),
-  bookmarks: many(bookmark),
   notifications: many(notification),
-}));
-
-// Like relations
-export const likeRelations = relations(like, ({ one }) => ({
-  user: one(user, {
-    fields: [like.userId],
-    references: [user.id],
-  }),
-  post: one(post, {
-    fields: [like.postId],
-    references: [post.id],
-  }),
 }));
 
 // Follow relations
@@ -57,18 +39,6 @@ export const followRelations = relations(follow, ({ one }) => ({
     fields: [follow.followingId],
     references: [user.id],
     relationName: "following",
-  }),
-}));
-
-// Bookmark relations
-export const bookmarkRelations = relations(bookmark, ({ one }) => ({
-  user: one(user, {
-    fields: [bookmark.userId],
-    references: [user.id],
-  }),
-  post: one(post, {
-    fields: [bookmark.postId],
-    references: [post.id],
   }),
 }));
 

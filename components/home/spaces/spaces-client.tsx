@@ -48,18 +48,26 @@ function SpaceCard({ space }: { space: Space }) {
   const [currentTextIndex, setCurrentTextIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
   const [avatarAnimating, setAvatarAnimating] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const getRandomUsers = useCallback(
-    (count: number) => {
-      const shuffled = [...space.allUsers].sort(() => Math.random() - 0.5);
-      return shuffled.slice(0, count);
-    },
-    [space.allUsers],
+  // Use deterministic initial users based on space title
+  const getInitialUsers = useCallback(() => {
+    if (space.allUsers.length === 0) return [];
+    // Use space title hash to deterministically pick users
+    const hash = space.title
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const startIndex = hash % space.allUsers.length;
+    const users = [];
+    for (let i = 0; i < Math.min(3, space.allUsers.length); i++) {
+      users.push(space.allUsers[(startIndex + i) % space.allUsers.length]);
+    }
+    return users;
+  }, [space.allUsers, space.title]);
+
+  const [visibleParticipants, setVisibleParticipants] = useState(() =>
+    getInitialUsers(),
   );
-
-  const initialUsers = useMemo(() => getRandomUsers(3), [getRandomUsers]);
-
-  const [visibleParticipants, setVisibleParticipants] = useState(initialUsers);
 
   const texts = useMemo(
     () => [space.title, ...visibleParticipants.map((p) => `${p.name} is here`)],
@@ -67,7 +75,16 @@ function SpaceCard({ space }: { space: Space }) {
   );
 
   useEffect(() => {
-    if (space.allUsers.length === 0 || visibleParticipants.length === 0) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (
+      !mounted ||
+      space.allUsers.length === 0 ||
+      visibleParticipants.length === 0
+    )
+      return;
 
     const interval = setInterval(() => {
       setAvatarAnimating(true);
@@ -100,7 +117,7 @@ function SpaceCard({ space }: { space: Space }) {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [texts.length, space.allUsers, visibleParticipants.length]);
+  }, [mounted, texts.length, space.allUsers, visibleParticipants.length]);
 
   if (visibleParticipants.length === 0) {
     return null;

@@ -15,6 +15,20 @@
       "when": 1772891918399,
       "tag": "0001_brown_silhouette",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1772897945124,
+      "tag": "0002_ambitious_daredevil",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1772898732948,
+      "tag": "0003_aberrant_zemo",
+      "breakpoints": true
     }
   ]
 }

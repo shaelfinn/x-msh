@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { post, user, like, bookmark } from "@/db/schema";
+import { post, user } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { eq, isNull, desc, sql, and } from "drizzle-orm";
+import { eq, isNull, desc, sql } from "drizzle-orm";
 
 export async function createPost(formData: FormData) {
   try {
@@ -49,7 +49,6 @@ export async function createPost(formData: FormData) {
       parentId: null;
       type: "info" | "offer" | "hire" | "collab";
       price?: number;
-      likes: number;
       impressions: number;
       media?: string[];
     } = {
@@ -58,7 +57,6 @@ export async function createPost(formData: FormData) {
       authorId: session.user.id,
       parentId: null,
       type: type,
-      likes: 0,
       impressions: 0,
     };
 
@@ -86,7 +84,7 @@ export async function createPost(formData: FormData) {
 
 export async function getPosts(userId?: string) {
   try {
-    // Get all posts with comment counts in a single query using subquery
+    // Get all posts with comment counts
     const posts = await db
       .select({
         id: post.id,
@@ -94,7 +92,8 @@ export async function getPosts(userId?: string) {
         media: post.media,
         type: post.type,
         price: post.price,
-        likes: post.likes,
+        likedBy: post.likedBy,
+        bookmarkedBy: post.bookmarkedBy,
         impressions: post.impressions,
         createdAt: post.createdAt,
         commentsCount: sql<number>`(
@@ -102,20 +101,6 @@ export async function getPosts(userId?: string) {
           FROM ${post} AS comments 
           WHERE comments.parent_id = ${post.id}
         )`,
-        isLiked: userId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${like} 
-              WHERE ${like.userId} = ${userId} 
-              AND ${like.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
-        isBookmarked: userId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${bookmark} 
-              WHERE ${bookmark.userId} = ${userId} 
-              AND ${bookmark.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
         author: {
           id: user.id,
           name: user.name,
@@ -130,7 +115,18 @@ export async function getPosts(userId?: string) {
       .orderBy(desc(post.createdAt))
       .limit(50);
 
-    return posts;
+    // Add isLiked, isBookmarked, and likes count
+    return posts.map((p) => {
+      const likedBy = (p.likedBy as string[]) || [];
+      const bookmarkedBy = (p.bookmarkedBy as string[]) || [];
+
+      return {
+        ...p,
+        isLiked: userId ? likedBy.includes(userId) : false,
+        isBookmarked: userId ? bookmarkedBy.includes(userId) : false,
+        likes: likedBy.length, // Real count from array
+      };
+    });
   } catch (error) {
     console.error("Error fetching posts:", error);
     return [];
@@ -144,7 +140,8 @@ export async function getPostById(postId: string, userId?: string) {
         id: post.id,
         content: post.content,
         media: post.media,
-        likes: post.likes,
+        likedBy: post.likedBy,
+        bookmarkedBy: post.bookmarkedBy,
         impressions: post.impressions,
         createdAt: post.createdAt,
         commentsCount: sql<number>`(
@@ -152,20 +149,6 @@ export async function getPostById(postId: string, userId?: string) {
           FROM ${post} AS comments 
           WHERE comments.parent_id = ${post.id}
         )`,
-        isLiked: userId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${like} 
-              WHERE ${like.userId} = ${userId} 
-              AND ${like.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
-        isBookmarked: userId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${bookmark} 
-              WHERE ${bookmark.userId} = ${userId} 
-              AND ${bookmark.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
         author: {
           id: user.id,
           name: user.name,
@@ -178,7 +161,18 @@ export async function getPostById(postId: string, userId?: string) {
       .where(eq(post.id, postId))
       .limit(1);
 
-    return result[0] || null;
+    if (!result[0]) return null;
+
+    const p = result[0];
+    const likedBy = (p.likedBy as string[]) || [];
+    const bookmarkedBy = (p.bookmarkedBy as string[]) || [];
+
+    return {
+      ...p,
+      isLiked: userId ? likedBy.includes(userId) : false,
+      isBookmarked: userId ? bookmarkedBy.includes(userId) : false,
+      likes: likedBy.length,
+    };
   } catch (error) {
     console.error("Error fetching post:", error);
     return null;
@@ -192,7 +186,7 @@ export async function getPostComments(postId: string) {
         id: post.id,
         content: post.content,
         media: post.media,
-        likes: post.likes,
+        likedBy: post.likedBy,
         createdAt: post.createdAt,
         author: {
           id: user.id,
@@ -206,7 +200,10 @@ export async function getPostComments(postId: string) {
       .where(eq(post.parentId, postId))
       .orderBy(desc(post.createdAt));
 
-    return comments;
+    return comments.map((c) => ({
+      ...c,
+      likes: ((c.likedBy as string[]) || []).length,
+    }));
   } catch (error) {
     console.error("Error fetching comments:", error);
     return [];
@@ -238,7 +235,6 @@ export async function createComment(postId: string, content: string) {
       content: content.trim(),
       authorId: session.user.id,
       parentId: postId,
-      likes: 0,
       impressions: 0,
     });
 
@@ -262,38 +258,38 @@ export async function toggleLike(postId: string) {
       return { success: false, error: "Not authenticated" };
     }
 
-    // Check if already liked
-    const existingLike = await db
-      .select()
-      .from(like)
-      .where(and(eq(like.userId, session.user.id), eq(like.postId, postId)))
+    const userId = session.user.id;
+
+    // Get current post
+    const [currentPost] = await db
+      .select({ likedBy: post.likedBy })
+      .from(post)
+      .where(eq(post.id, postId))
       .limit(1);
 
-    if (existingLike.length > 0) {
-      // Unlike
-      await db
-        .delete(like)
-        .where(and(eq(like.userId, session.user.id), eq(like.postId, postId)));
+    if (!currentPost) {
+      return { success: false, error: "Post not found" };
+    }
 
-      // Decrement likes count
+    const likedBy = (currentPost.likedBy as string[]) || [];
+    const isLiked = likedBy.includes(userId);
+
+    if (isLiked) {
+      // Unlike
+      const newLikedBy = likedBy.filter((id) => id !== userId);
       await db
         .update(post)
-        .set({ likes: sql`${post.likes} - 1` })
+        .set({ likedBy: newLikedBy })
         .where(eq(post.id, postId));
 
       revalidatePath("/");
       return { success: true, liked: false };
     } else {
       // Like
-      await db.insert(like).values({
-        userId: session.user.id,
-        postId: postId,
-      });
-
-      // Increment likes count
+      const newLikedBy = [...likedBy, userId];
       await db
         .update(post)
-        .set({ likes: sql`${post.likes} + 1` })
+        .set({ likedBy: newLikedBy })
         .where(eq(post.id, postId));
 
       revalidatePath("/");
@@ -315,34 +311,39 @@ export async function toggleBookmark(postId: string) {
       return { success: false, error: "Not authenticated" };
     }
 
-    // Check if already bookmarked
-    const existingBookmark = await db
-      .select()
-      .from(bookmark)
-      .where(
-        and(eq(bookmark.userId, session.user.id), eq(bookmark.postId, postId)),
-      )
+    const userId = session.user.id;
+
+    // Get current post
+    const [currentPost] = await db
+      .select({ bookmarkedBy: post.bookmarkedBy })
+      .from(post)
+      .where(eq(post.id, postId))
       .limit(1);
 
-    if (existingBookmark.length > 0) {
+    if (!currentPost) {
+      return { success: false, error: "Post not found" };
+    }
+
+    const bookmarkedBy = (currentPost.bookmarkedBy as string[]) || [];
+    const isBookmarked = bookmarkedBy.includes(userId);
+
+    if (isBookmarked) {
       // Remove bookmark
+      const newBookmarkedBy = bookmarkedBy.filter((id) => id !== userId);
       await db
-        .delete(bookmark)
-        .where(
-          and(
-            eq(bookmark.userId, session.user.id),
-            eq(bookmark.postId, postId),
-          ),
-        );
+        .update(post)
+        .set({ bookmarkedBy: newBookmarkedBy })
+        .where(eq(post.id, postId));
 
       revalidatePath("/");
       return { success: true, bookmarked: false };
     } else {
       // Add bookmark
-      await db.insert(bookmark).values({
-        userId: session.user.id,
-        postId: postId,
-      });
+      const newBookmarkedBy = [...bookmarkedBy, userId];
+      await db
+        .update(post)
+        .set({ bookmarkedBy: newBookmarkedBy })
+        .where(eq(post.id, postId));
 
       revalidatePath("/");
       return { success: true, bookmarked: true };
@@ -350,36 +351,6 @@ export async function toggleBookmark(postId: string) {
   } catch (error) {
     console.error("Error toggling bookmark:", error);
     return { success: false, error: "Failed to toggle bookmark" };
-  }
-}
-
-export async function checkUserLikedPost(postId: string, userId: string) {
-  try {
-    const result = await db
-      .select()
-      .from(like)
-      .where(and(eq(like.userId, userId), eq(like.postId, postId)))
-      .limit(1);
-
-    return result.length > 0;
-  } catch (error) {
-    console.error("Error checking like:", error);
-    return false;
-  }
-}
-
-export async function checkUserBookmarkedPost(postId: string, userId: string) {
-  try {
-    const result = await db
-      .select()
-      .from(bookmark)
-      .where(and(eq(bookmark.userId, userId), eq(bookmark.postId, postId)))
-      .limit(1);
-
-    return result.length > 0;
-  } catch (error) {
-    console.error("Error checking bookmark:", error);
-    return false;
   }
 }
 

@@ -87,15 +87,14 @@ export async function getUserProfile(username: string) {
 
 export async function getUserPosts(userId: string, currentUserId?: string) {
   try {
-    const { like, bookmark } = await import("@/db/schema");
-
     // Get posts by user (only top-level posts, not comments)
     const posts = await db
       .select({
         id: post.id,
         content: post.content,
         media: post.media,
-        likes: post.likes,
+        likedBy: post.likedBy,
+        bookmarkedBy: post.bookmarkedBy,
         impressions: post.impressions,
         createdAt: post.createdAt,
         commentsCount: sql<number>`(
@@ -103,20 +102,6 @@ export async function getUserPosts(userId: string, currentUserId?: string) {
           FROM ${post} AS comments 
           WHERE comments.parent_id = ${post.id}
         )`,
-        isLiked: currentUserId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${like} 
-              WHERE ${like.userId} = ${currentUserId} 
-              AND ${like.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
-        isBookmarked: currentUserId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${bookmark} 
-              WHERE ${bookmark.userId} = ${currentUserId} 
-              AND ${bookmark.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
         author: {
           id: user.id,
           name: user.name,
@@ -129,7 +114,19 @@ export async function getUserPosts(userId: string, currentUserId?: string) {
       .where(and(eq(post.authorId, userId), isNull(post.parentId)))
       .orderBy(desc(post.createdAt));
 
-    return posts;
+    return posts.map((p) => {
+      const likedBy = (p.likedBy as string[]) || [];
+      const bookmarkedBy = (p.bookmarkedBy as string[]) || [];
+
+      return {
+        ...p,
+        isLiked: currentUserId ? likedBy.includes(currentUserId) : false,
+        isBookmarked: currentUserId
+          ? bookmarkedBy.includes(currentUserId)
+          : false,
+        likes: likedBy.length,
+      };
+    });
   } catch (error) {
     console.error("Error fetching user posts:", error);
     return [];
@@ -295,15 +292,14 @@ export async function toggleFollow(userId: string) {
 
 export async function getUserReplies(userId: string, currentUserId?: string) {
   try {
-    const { like, bookmark } = await import("@/db/schema");
-
-    // Get replies by user with parent post info
+    // Get replies by user
     const replies = await db
       .select({
         id: post.id,
         content: post.content,
         media: post.media,
-        likes: post.likes,
+        likedBy: post.likedBy,
+        bookmarkedBy: post.bookmarkedBy,
         impressions: post.impressions,
         createdAt: post.createdAt,
         parentId: post.parentId,
@@ -312,20 +308,6 @@ export async function getUserReplies(userId: string, currentUserId?: string) {
           FROM ${post} AS comments 
           WHERE comments.parent_id = ${post.id}
         )`,
-        isLiked: currentUserId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${like} 
-              WHERE ${like.userId} = ${currentUserId} 
-              AND ${like.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
-        isBookmarked: currentUserId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${bookmark} 
-              WHERE ${bookmark.userId} = ${currentUserId} 
-              AND ${bookmark.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
         author: {
           id: user.id,
           name: user.name,
@@ -338,7 +320,7 @@ export async function getUserReplies(userId: string, currentUserId?: string) {
       .where(and(eq(post.authorId, userId), sql`${post.parentId} IS NOT NULL`))
       .orderBy(desc(post.createdAt));
 
-    // Get parent posts info with full details
+    // Get parent posts info
     const repliesWithParent = await Promise.all(
       replies.map(async (reply) => {
         if (!reply.parentId) return { ...reply, parentPost: null };
@@ -348,7 +330,8 @@ export async function getUserReplies(userId: string, currentUserId?: string) {
             id: post.id,
             content: post.content,
             media: post.media,
-            likes: post.likes,
+            likedBy: post.likedBy,
+            bookmarkedBy: post.bookmarkedBy,
             impressions: post.impressions,
             createdAt: post.createdAt,
             commentsCount: sql<number>`(
@@ -356,20 +339,6 @@ export async function getUserReplies(userId: string, currentUserId?: string) {
               FROM ${post} AS comments 
               WHERE comments.parent_id = ${post.id}
             )`,
-            isLiked: currentUserId
-              ? sql<boolean>`EXISTS(
-                  SELECT 1 FROM ${like} 
-                  WHERE ${like.userId} = ${currentUserId} 
-                  AND ${like.postId} = ${post.id}
-                )`
-              : sql<boolean>`false`,
-            isBookmarked: currentUserId
-              ? sql<boolean>`EXISTS(
-                  SELECT 1 FROM ${bookmark} 
-                  WHERE ${bookmark.userId} = ${currentUserId} 
-                  AND ${bookmark.postId} = ${post.id}
-                )`
-              : sql<boolean>`false`,
             author: {
               name: user.name,
               username: user.username,
@@ -381,9 +350,33 @@ export async function getUserReplies(userId: string, currentUserId?: string) {
           .where(eq(post.id, reply.parentId))
           .limit(1);
 
+        const parent = parentResult[0];
+        const parentLikedBy = parent ? (parent.likedBy as string[]) || [] : [];
+        const parentBookmarkedBy = parent
+          ? (parent.bookmarkedBy as string[]) || []
+          : [];
+
         return {
           ...reply,
-          parentPost: parentResult[0] || null,
+          likes: ((reply.likedBy as string[]) || []).length,
+          isLiked: currentUserId
+            ? ((reply.likedBy as string[]) || []).includes(currentUserId)
+            : false,
+          isBookmarked: currentUserId
+            ? ((reply.bookmarkedBy as string[]) || []).includes(currentUserId)
+            : false,
+          parentPost: parent
+            ? {
+                ...parent,
+                likes: parentLikedBy.length,
+                isLiked: currentUserId
+                  ? parentLikedBy.includes(currentUserId)
+                  : false,
+                isBookmarked: currentUserId
+                  ? parentBookmarkedBy.includes(currentUserId)
+                  : false,
+              }
+            : null,
         };
       }),
     );
@@ -397,15 +390,14 @@ export async function getUserReplies(userId: string, currentUserId?: string) {
 
 export async function getUserLikes(userId: string, currentUserId?: string) {
   try {
-    const { like, bookmark } = await import("@/db/schema");
-
-    // Get posts liked by user
-    const likedPosts = await db
+    // Get all posts where userId is in the likedBy array
+    const allPosts = await db
       .select({
         id: post.id,
         content: post.content,
         media: post.media,
-        likes: post.likes,
+        likedBy: post.likedBy,
+        bookmarkedBy: post.bookmarkedBy,
         impressions: post.impressions,
         createdAt: post.createdAt,
         commentsCount: sql<number>`(
@@ -413,14 +405,6 @@ export async function getUserLikes(userId: string, currentUserId?: string) {
           FROM ${post} AS comments 
           WHERE comments.parent_id = ${post.id}
         )`,
-        isLiked: sql<boolean>`true`,
-        isBookmarked: currentUserId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${bookmark} 
-              WHERE ${bookmark.userId} = ${currentUserId} 
-              AND ${bookmark.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
         author: {
           id: user.id,
           name: user.name,
@@ -428,11 +412,26 @@ export async function getUserLikes(userId: string, currentUserId?: string) {
           image: user.image,
         },
       })
-      .from(like)
-      .innerJoin(post, eq(like.postId, post.id))
+      .from(post)
       .innerJoin(user, eq(post.authorId, user.id))
-      .where(eq(like.userId, userId))
-      .orderBy(desc(like.createdAt));
+      .orderBy(desc(post.createdAt));
+
+    // Filter posts liked by user
+    const likedPosts = allPosts
+      .filter((p) => ((p.likedBy as string[]) || []).includes(userId))
+      .map((p) => {
+        const likedBy = (p.likedBy as string[]) || [];
+        const bookmarkedBy = (p.bookmarkedBy as string[]) || [];
+
+        return {
+          ...p,
+          likes: likedBy.length,
+          isLiked: true,
+          isBookmarked: currentUserId
+            ? bookmarkedBy.includes(currentUserId)
+            : false,
+        };
+      });
 
     return likedPosts;
   } catch (error) {
@@ -443,15 +442,14 @@ export async function getUserLikes(userId: string, currentUserId?: string) {
 
 export async function getUserBookmarks(userId: string, currentUserId?: string) {
   try {
-    const { like, bookmark } = await import("@/db/schema");
-
-    // Get posts bookmarked by user
-    const bookmarkedPosts = await db
+    // Get all posts where userId is in the bookmarkedBy array
+    const allPosts = await db
       .select({
         id: post.id,
         content: post.content,
         media: post.media,
-        likes: post.likes,
+        likedBy: post.likedBy,
+        bookmarkedBy: post.bookmarkedBy,
         impressions: post.impressions,
         createdAt: post.createdAt,
         commentsCount: sql<number>`(
@@ -459,14 +457,6 @@ export async function getUserBookmarks(userId: string, currentUserId?: string) {
           FROM ${post} AS comments 
           WHERE comments.parent_id = ${post.id}
         )`,
-        isLiked: currentUserId
-          ? sql<boolean>`EXISTS(
-              SELECT 1 FROM ${like} 
-              WHERE ${like.userId} = ${currentUserId} 
-              AND ${like.postId} = ${post.id}
-            )`
-          : sql<boolean>`false`,
-        isBookmarked: sql<boolean>`true`,
         author: {
           id: user.id,
           name: user.name,
@@ -474,11 +464,24 @@ export async function getUserBookmarks(userId: string, currentUserId?: string) {
           image: user.image,
         },
       })
-      .from(bookmark)
-      .innerJoin(post, eq(bookmark.postId, post.id))
+      .from(post)
       .innerJoin(user, eq(post.authorId, user.id))
-      .where(eq(bookmark.userId, userId))
-      .orderBy(desc(bookmark.createdAt));
+      .orderBy(desc(post.createdAt));
+
+    // Filter posts bookmarked by user
+    const bookmarkedPosts = allPosts
+      .filter((p) => ((p.bookmarkedBy as string[]) || []).includes(userId))
+      .map((p) => {
+        const likedBy = (p.likedBy as string[]) || [];
+        const bookmarkedBy = (p.bookmarkedBy as string[]) || [];
+
+        return {
+          ...p,
+          likes: likedBy.length,
+          isLiked: currentUserId ? likedBy.includes(currentUserId) : false,
+          isBookmarked: true,
+        };
+      });
 
     return bookmarkedPosts;
   } catch (error) {
